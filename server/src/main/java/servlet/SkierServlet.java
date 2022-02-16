@@ -1,12 +1,17 @@
 package servlet;
 
 import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
-import model.Ride;
-import model.SkierEntity;
+import model.Message;
+import model.LiftRide;
+import model.SkierVertical;
 
 
 @WebServlet(name = "SkierServlet", value = "/SkierServlet")
@@ -29,18 +34,26 @@ public class SkierServlet extends HttpServlet {
         String[] urlPath = url.split("/");
         if (!isUrlValid(urlPath)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson("Invalid inputs"));
+            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
             return;
         }
 
         // valid
         if (urlPath[2].equals("vertical")) {
-            SkierEntity skier = new SkierEntity(2, -1, "Winter", 102);
-            response.getWriter().write(gson.toJson(skier));
+            // TODO: business logic to calculate total vertical for the skier for specified seasons at the specified resort
+            SkierVertical skier1 = new SkierVertical(1, "2022-Winter", "23", 102, 202);
+            SkierVertical skier2 = new SkierVertical(1, "2021-Winter", "86", 102, 306);
+
+            Map<String, List<SkierVertical>> verticals = new HashMap<>();
+            verticals.computeIfAbsent("resorts", a -> new ArrayList<SkierVertical>()).add(skier1);
+            verticals.computeIfAbsent("resorts", a -> new ArrayList<SkierVertical>()).add(skier2);
+
+            response.getWriter().write(gson.toJson(verticals));
+            response.setStatus(HttpServletResponse.SC_OK);
         } else {
             // urlParts = [, 1, seasons, 2019, day, 1, skier, 123]
-            Ride ride = new Ride(Integer.parseInt(urlPath[1]), urlPath[3], urlPath[5], Integer.parseInt(urlPath[7]), 202);
-            response.getWriter().write(gson.toJson(ride));
+            // TODO: get the total vertical for the skier for the specified ski day
+            response.getWriter().write("34507");
             response.setStatus(HttpServletResponse.SC_OK);
         }
     }
@@ -48,7 +61,29 @@ public class SkierServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        Gson gson = new Gson();
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
+        String url = request.getRequestURI();
+        if (url == null || url.length() == 0) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
+            return;
+        }
+
+        String[] urlPath = url.split("/");
+        if (!isUrlValid(urlPath) || urlPath[2].equals("seasons")) {
+            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        // valid ride
+        // urlParts = [, 1, seasons, 2019, day, 1, skier, 123]
+        LiftRide liftRide = gson.fromJson(request.getReader(), LiftRide.class);
+        // TODO: process lift ride
+        response.setStatus(HttpServletResponse.SC_CREATED);
     }
 
     // validate the request url path according to the API spec

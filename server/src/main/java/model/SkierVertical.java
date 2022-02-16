@@ -1,13 +1,13 @@
 package model;
 
-public class Ride {
+public class SkierVertical {
     Integer resortID;
     String seasonID;
     String dayID;
     Integer skierID;
     Integer vertical;
 
-    public Ride(Integer resortID, String seasonID, String dayID, Integer skierID,
+    public SkierVertical(Integer resortID, String seasonID, String dayID, Integer skierID,
             Integer vertical) {
         this.resortID = resortID;
         this.seasonID = seasonID;
