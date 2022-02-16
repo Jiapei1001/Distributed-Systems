@@ -1,6 +1,8 @@
 package servlet;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +75,7 @@ public class SkierServlet extends HttpServlet {
         }
 
         String[] urlPath = url.split("/");
-        if (!isUrlValid(urlPath) || urlPath[2].equals("seasons")) {
+        if (!isUrlValid(urlPath) || !urlPath[2].equals("seasons")) {
             response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -81,8 +83,20 @@ public class SkierServlet extends HttpServlet {
 
         // valid ride
         // urlParts = [, 1, seasons, 2019, day, 1, skier, 123]
-        LiftRide liftRide = gson.fromJson(request.getReader(), LiftRide.class);
+        // convert request body to a map
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> reqBody = gson.fromJson(request.getReader(), type);
+
+        LiftRide ride = new LiftRide(
+                Integer.parseInt(urlPath[1]),
+                urlPath[3],
+                urlPath[5],
+                Integer.parseInt(urlPath[7]),
+                Long.parseLong(reqBody.get("time")),
+                Integer.parseInt(reqBody.get("liftID")),
+                Long.parseLong(reqBody.get("waitTime")));
         // TODO: process lift ride
+
         response.setStatus(HttpServletResponse.SC_CREATED);
     }
 
