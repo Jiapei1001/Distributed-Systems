@@ -12,9 +12,9 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
-import model.Message;
+import model.ResponseMsg;
 import model.Resort;
-import model.ResortReport;
+import model.ResortSkiers;
 import model.Season;
 
 @WebServlet(name = "ResortServlet", value = "/ResortServlet")
@@ -27,7 +27,7 @@ public class ResortServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String url = request.getRequestURI();
+        String url = request.getPathInfo();
         // url = /resorts
         if (url == null || url.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_OK);
@@ -41,7 +41,7 @@ public class ResortServlet extends HttpServlet {
         String[] urlPath = url.split("/");
         if (!isUrlValid(urlPath)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
+            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs")));
             return;
         }
 
@@ -59,7 +59,7 @@ public class ResortServlet extends HttpServlet {
         else if (urlPath.length == 7) {
             // TODO: process to get the number of skiers at resort/season/day
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write(gson.toJson(new ResortReport("Mission Ridge", 78999)));
+            response.getWriter().write(gson.toJson(new ResortSkiers("Mission Ridge", 78999)));
         }
     }
 
@@ -70,17 +70,17 @@ public class ResortServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String url = request.getRequestURI();
+        String url = request.getPathInfo();
         if (url == null || url.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
+            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs")));
             return;
         }
 
         String[] urlPath = url.split("/");
         if (!isUrlValid(urlPath)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
+            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs")));
             return;
         }
 

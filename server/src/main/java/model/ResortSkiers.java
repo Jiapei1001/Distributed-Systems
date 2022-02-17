@@ -1,10 +1,10 @@
 package model;
 
-public class ResortReport {
+public class ResortSkiers {
     private String resortName;
     private Integer numSkiers;
 
-    public ResortReport(String resortName, Integer numSkiers) {
+    public ResortSkiers(String resortName, Integer numSkiers) {
         this.resortName = resortName;
         this.numSkiers = numSkiers;
     }

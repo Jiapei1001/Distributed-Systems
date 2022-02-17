@@ -22,4 +22,14 @@
     <servlet-name>ResortServlet</servlet-name>
     <url-pattern>/resorts/*</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>StatisticServlet</servlet-name>
+    <servlet-class>servlet.StatisticServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>StatisticServlet</servlet-name>
+    <url-pattern>/statistics/*</url-pattern>
+  </servlet-mapping>
 </web-app>

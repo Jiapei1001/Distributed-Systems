@@ -11,7 +11,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.annotation.*;
 import java.io.IOException;
-import model.Message;
+import model.ResponseMsg;
 import model.LiftRide;
 import model.SkierVertical;
 
@@ -26,17 +26,17 @@ public class SkierServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String url = request.getRequestURI();
+        String url = request.getPathInfo();
         if (url == null || url.length() == 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
+            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs")));
             return;
         }
 
         String[] urlPath = url.split("/");
         if (!isUrlValid(urlPath)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
+            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs")));
             return;
         }
 
@@ -67,16 +67,16 @@ public class SkierServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String url = request.getRequestURI();
+        String url = request.getPathInfo();
         if (url == null || url.length() == 0) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
+            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs")));
             return;
         }
 
         String[] urlPath = url.split("/");
         if (!isUrlValid(urlPath) || !urlPath[2].equals("seasons")) {
-            response.getWriter().write(gson.toJson(new Message("Invalid inputs")));
+            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs")));
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -92,9 +92,9 @@ public class SkierServlet extends HttpServlet {
                 urlPath[3],
                 urlPath[5],
                 Integer.parseInt(urlPath[7]),
-                Long.parseLong(reqBody.get("time")),
+                Integer.parseInt(reqBody.get("time")),
                 Integer.parseInt(reqBody.get("liftID")),
-                Long.parseLong(reqBody.get("waitTime")));
+                Integer.parseInt(reqBody.get("waitTime")));
         // TODO: process lift ride
 
         response.setStatus(HttpServletResponse.SC_CREATED);

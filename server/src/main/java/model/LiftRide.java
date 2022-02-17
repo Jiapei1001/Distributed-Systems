@@ -5,12 +5,12 @@ public class LiftRide {
     String seasonID;
     String dayID;
     Integer skierID;
-    Long time;
+    Integer time;
     Integer liftID;
-    Long waitTime;
+    Integer waitTime;
 
     public LiftRide(Integer resortID, String seasonID, String dayID, Integer skierID,
-            Long time, Integer liftID, Long waitTime) {
+            Integer time, Integer liftID, Integer waitTime) {
         this.resortID = resortID;
         this.seasonID = seasonID;
         this.dayID = dayID;
