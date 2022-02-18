@@ -71,26 +71,51 @@ public class SkiThread extends Thread {
             ride.setWaitTime(rdWaitTime);
 
             // try 5 times
-            try {
-                apiInstance.writeNewLiftRide(ride, resortID, seasonID, dayID, rdSkierID);
-                stats.incrementSuccessfulPost(1);
-            } catch (ApiException e) {
-                int retry = 0;
-                while (retry < RETRIES) {
-                    try {
-                        apiInstance.writeNewLiftRide(ride, resortID, seasonID, dayID, rdSkierID);
-                        stats.incrementSuccessfulPost(1);
-                        break;
-                    } catch (ApiException e1) {
-                        // pass
-                    }
-                    retry++;
-                }
-                if (retry == RETRIES) {
+            //boolean successful = false;
+            //try {
+            //    apiInstance.writeNewLiftRide(ride, resortID, seasonID, dayID, rdSkierID);
+            //    successful = true;
+            //    stats.incrementSuccessfulPost(1);
+            //    //stats.getSuccessfulPosts().getAndIncrement();
+            //} catch (ApiException e) {
+            //    int retry = 0;
+            //    while (retry < RETRIES) {
+            //        try {
+            //            apiInstance.writeNewLiftRide(ride, resortID, seasonID, dayID, rdSkierID);
+            //            successful = true;
+            //            stats.incrementSuccessfulPost(1);
+            //            //stats.getSuccessfulPosts().getAndIncrement();
+            //            break;
+            //        } catch (ApiException e1) {
+            //            // pass
+            //        }
+            //        retry++;
+            //    }
+            //}
+            //if (!successful) {
+            //    stats.incrementFailedPost(1);
+            //    //stats.getFailedPosts().getAndDecrement();
+            //}
+
+
+            int j = 0;
+            boolean success = false;
+            for (; j < RETRIES; j++) {
+                try {
+                    apiInstance.writeNewLiftRide(ride, resortID, seasonID, dayID, rdSkierID);
+                    success = true;
+                    //stats.getSuccessfulPosts().getAndIncrement();
+                    stats.incrementSuccessfulPost(1);
+                    break;
+                } catch (ApiException e) {
                     stats.incrementFailedPost(1);
-                    e.printStackTrace();
+
+                    System.out.println(e.getCode());
                 }
-                // if retry success, no need to printStackTrace()
+            }
+            if (!success) {
+                //stats.getFailedPosts().getAndIncrement();
+                stats.incrementFailedPost(1);
             }
 
             // count down latch

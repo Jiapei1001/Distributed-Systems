@@ -1,10 +1,11 @@
+import static java.lang.Thread.sleep;
+
 import java.util.concurrent.CountDownLatch;
 
 public class Client {
 
     private static final float LATCH_THRESHOLD = 0.2f;
 
-    private static final Integer DEFAULT_WAIT_TIME = 10;
     private static final Integer P1_START_TIME = 1;
     private static final Integer P1_END_TIME = 90;
 
@@ -13,6 +14,8 @@ public class Client {
 
     private static final Integer P3_START_TIME = 361;
     private static final Integer P3_END_TIME = 420;
+
+    private static final Integer DEFAULT_WAIT_TIME = 10;
 
     public static void main(String[] args) throws Exception {
         // initiate default args
@@ -30,6 +33,8 @@ public class Client {
         int resortID = 2;
         String seasonID = "2022";
         String dayID = "166";
+
+        long start = System.currentTimeMillis();
 
         // phase 1: start up
         ThreadDetail td = new ThreadDetail();
@@ -67,7 +72,7 @@ public class Client {
         // phase 3: cool down
         String phase3 = "Phase3";
         ThreadDetail p3 = td.getThreadDetail(phase3, numThread, numAvgRide, numSkier);
-        CountDownLatch latchP3 = latchP1; // don't call await for latchP3, just pass into constructor
+        CountDownLatch latchP3 = new CountDownLatch((int) (p2.numThreadP * LATCH_THRESHOLD)); // don't call await for latchP3, just pass into constructor
 
         seg = p3.numSkierPerThread;
         for (int i = 0; i < p3.numThreadP; i++) {
@@ -78,12 +83,21 @@ public class Client {
         }
         printDetails(phase3, p3);
 
+        long end = System.currentTimeMillis();
+        long wall = end - start;
+        float throughput = (float) (p1.totalReq + p2.totalReq + p3.totalReq) * 1000 / wall;
 
+        sleep(4000);
+        System.out.println("# of successful:\t\t" + stats.getSuccessfulPosts());
+        System.out.println("# of fail:\t\t" + stats.getFailedPosts());
+        System.out.println("wall time:\t\t" + (float)wall /1000);
+        System.out.println("throughput per second:\t\t" + throughput);
     }
 
     private static void printDetails(String phase, ThreadDetail p) {
-        System.out.println(phase + " number of threads: " + p.numThreadP);
-        System.out.println(phase + " number of skiers: " + p.numSkierPerThread);
-        System.out.println(phase + " number of requests: " + p.reqPerThread + "\n\n");
+        System.out.println(phase + " # of threads: " + p.numThreadP);
+        System.out.println(phase + " # of skiers: " + p.numSkierPerThread);
+        System.out.println(phase + " # of requests per thread: " + p.reqPerThread);
+        System.out.println(phase + " # of total requests: " + p.totalReq + "\n\n");
     }
 }

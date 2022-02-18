@@ -23,7 +23,7 @@ public class InputArgs {
         this.numThread = 64;
         this.numSkier = 1024;
         this.numLift = 40;
-        this.numAvgRide = 20;
+        this.numAvgRide = 10;
         this.ipAndPort = "http://localhost:8080/";
         this.context = "server";
     }
