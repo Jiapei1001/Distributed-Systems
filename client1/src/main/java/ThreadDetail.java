@@ -20,29 +20,29 @@ public class ThreadDetail {
         this.numAvgRideP = 0;
         this.numSkierPerThread = 0;
         this.reqPerThread = 0;
-        int totalReq = 0;
+        this.totalReq = 0;
     }
 
     public ThreadDetail getThreadDetail(String phase, int numThread, int numAvgRide, int numSkier) {
         switch (phase) {
             case "Phase1":
-                numThreadP = (int) (numThread / P1_THREAD_DIVISOR); //16
+                numThreadP = (numThread / P1_THREAD_DIVISOR) == 0 ? 1 : (numThread / P1_THREAD_DIVISOR); //16
                 numAvgRideP = (int) (numAvgRide * P1_AVG_RIDES_FACTOR); //20 * 0.2 = 4
-                numSkierPerThread = (int) Math.ceil((float) numSkier / numThreadP);
+                numSkierPerThread = numSkier / numThreadP;
                 reqPerThread = (numAvgRideP * numSkier) / (numThreadP); // NOTE: here * numSkiers, (numRunsx0.2)x(numSkiers/(numThreads/4))
                 totalReq = numThreadP * reqPerThread;
                 break;
             case "Phase2":
-                numThreadP = (int) (numThread / P2_THREAD_DIVISOR);
+                numThreadP = (numThread / P2_THREAD_DIVISOR) == 0 ? 1 : (numThread / P2_THREAD_DIVISOR);
                 numAvgRideP = (int) (numAvgRide * P2_AVG_RIDES_FACTOR);
-                numSkierPerThread = (int) Math.ceil((float) numSkier / numThreadP);
+                numSkierPerThread = numSkier / numThreadP;
                 reqPerThread = (numAvgRideP * numSkier) / (numThreadP);
                 totalReq = numThreadP * reqPerThread;
                 break;
             case "Phase3":
-                numThreadP = (int) (numThread / P3_THREAD_DIVISOR);
+                numThreadP = (numThread / P3_THREAD_DIVISOR) == 0 ? 1 : (numThread / P3_THREAD_DIVISOR);
                 numAvgRideP = (int) (numAvgRide * P3_AVG_RIDES_FACTOR);
-                numSkierPerThread = (int) Math.ceil((float) numSkier / numThreadP);
+                numSkierPerThread = numSkier / numThreadP;
                 reqPerThread = (numAvgRideP * numSkier) / (numThreadP);
                 totalReq = numThreadP * reqPerThread;
                 break;

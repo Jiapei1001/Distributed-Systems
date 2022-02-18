@@ -2,36 +2,35 @@ import io.swagger.client.ApiClient;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.SkiersApi;
 import io.swagger.client.model.LiftRide;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SkiThread extends Thread {
 
     private static final int RETRIES = 5;
 
-    private Integer startSkierID;
-    private Integer endSkierID;
-    private Integer startTime;
-    private Integer endTime;
-    private Integer numLifts;
-    private Integer totalRequest;
-    private Integer waitTime;
+    private final Integer startSkierID;
+    private final Integer endSkierID;
+    private final Integer startTime;
+    private final Integer endTime;
+    private final Integer numLifts;
+    private final Integer totalRequest;
+    private final Integer waitTime;
 
-    private String basePath;
+    private final String basePath;
 
-    private Integer resortID;
-    private String seasonID;
-    private String dayID;
+    private final Integer resortID;
+    private final String seasonID;
+    private final String dayID;
 
-    private CountDownLatch currLatch;
-    private Stats stats;
-
-    private Random rand;
+    private final CountDownLatch threadLatch;
+    private final CountDownLatch reqLatch;
+    private final Stats stats;
 
     public SkiThread(Integer startSkierID, Integer endSkierID, Integer startTime,
             Integer endTime, Integer numLifts, Integer totalRequest,
             Integer waitTime, String basePath, Integer resortID, String seasonID,
-            String dayID, CountDownLatch currLatch, Stats stats) {
+            String dayID, CountDownLatch currLatch, CountDownLatch reqLatch, Stats stats) {
         this.startSkierID = startSkierID;
         this.endSkierID = endSkierID;
         this.startTime = startTime;
@@ -43,10 +42,9 @@ public class SkiThread extends Thread {
         this.resortID = resortID;
         this.seasonID = seasonID;
         this.dayID = dayID;
-        this.currLatch = currLatch;
+        this.threadLatch = currLatch;
+        this.reqLatch = reqLatch;
         this.stats = stats;
-
-        this.rand = new Random();
     }
 
     @Override
@@ -59,44 +57,17 @@ public class SkiThread extends Thread {
 
         for (int i = 0; i < totalRequest; i++) {
             // [s, e - s + 1]
-            int rdSkierID = startSkierID + rand.nextInt(endSkierID - startSkierID + 1);
+            int rdSkierID = startSkierID +
+                    ThreadLocalRandom.current().nextInt(endSkierID - startSkierID + 1);
             // [0, numLifts) -> [1, numLifts]
-            int rdLiftID = 1 + rand.nextInt(this.numLifts);
-            int rdTime = startTime + rand.nextInt(endTime - startTime + 1);
-            int rdWaitTime = rand.nextInt(waitTime + 1);
+            int rdLiftID = 1 + ThreadLocalRandom.current().nextInt(this.numLifts);
+            int rdTime = startTime + ThreadLocalRandom.current().nextInt(endTime - startTime + 1);
+            int rdWaitTime = ThreadLocalRandom.current().nextInt(waitTime + 1);
 
             LiftRide ride = new LiftRide();
             ride.setTime(rdTime);
             ride.setLiftID(rdLiftID);
             ride.setWaitTime(rdWaitTime);
-
-            // try 5 times
-            //boolean successful = false;
-            //try {
-            //    apiInstance.writeNewLiftRide(ride, resortID, seasonID, dayID, rdSkierID);
-            //    successful = true;
-            //    stats.incrementSuccessfulPost(1);
-            //    //stats.getSuccessfulPosts().getAndIncrement();
-            //} catch (ApiException e) {
-            //    int retry = 0;
-            //    while (retry < RETRIES) {
-            //        try {
-            //            apiInstance.writeNewLiftRide(ride, resortID, seasonID, dayID, rdSkierID);
-            //            successful = true;
-            //            stats.incrementSuccessfulPost(1);
-            //            //stats.getSuccessfulPosts().getAndIncrement();
-            //            break;
-            //        } catch (ApiException e1) {
-            //            // pass
-            //        }
-            //        retry++;
-            //    }
-            //}
-            //if (!successful) {
-            //    stats.incrementFailedPost(1);
-            //    //stats.getFailedPosts().getAndDecrement();
-            //}
-
 
             int j = 0;
             boolean success = false;
@@ -104,26 +75,28 @@ public class SkiThread extends Thread {
                 try {
                     apiInstance.writeNewLiftRide(ride, resortID, seasonID, dayID, rdSkierID);
                     success = true;
-                    //stats.getSuccessfulPosts().getAndIncrement();
                     stats.incrementSuccessfulPost(1);
                     break;
                 } catch (ApiException e) {
-                    stats.incrementFailedPost(1);
-
-                    System.out.println(e.getCode());
+                    // pass
                 }
             }
             if (!success) {
-                //stats.getFailedPosts().getAndIncrement();
                 stats.incrementFailedPost(1);
             }
-
-            // count down latch
+            // count down request latch
             try {
-                currLatch.countDown();
+                reqLatch.countDown();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        // count down thread latch after processing all requests
+        try {
+            threadLatch.countDown();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

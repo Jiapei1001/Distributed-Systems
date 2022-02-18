@@ -19,9 +19,18 @@ public class InputArgs {
         this.ipAndPort = ipAndPort;
     }
 
+    //public void initDefault() {
+    //    this.numThread = 64;
+    //    this.numSkier = 1024;
+    //    this.numLift = 40;
+    //    this.numAvgRide = 10;
+    //    this.ipAndPort = "http://localhost:8080/";
+    //    this.context = "server";
+    //}
+
     public void initDefault() {
-        this.numThread = 64;
-        this.numSkier = 1024;
+        this.numThread = 256;
+        this.numSkier = 20000;
         this.numLift = 40;
         this.numAvgRide = 10;
         this.ipAndPort = "http://localhost:8080/";
