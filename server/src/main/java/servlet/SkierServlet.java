@@ -112,11 +112,11 @@ public class SkierServlet extends HttpServlet {
             return ServerUtil.isNumeric(urlPath[1])
                     && (urlPath[2].equals("seasons"))
                     && ServerUtil.isNumeric(urlPath[3])
-                    && (urlPath[4].equals("day"))
+                    && (urlPath[4].equals("days"))
                     && ServerUtil.isNumeric((urlPath[5]))
                     && Integer.parseInt(urlPath[5]) >= 1
                     && Integer.parseInt(urlPath[5]) <= 365
-                    && (urlPath[6].equals("skier"))
+                    && (urlPath[6].equals("skiers"))
                     && ServerUtil.isNumeric(urlPath[7]);
         }
 

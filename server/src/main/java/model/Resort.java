@@ -6,7 +6,7 @@ import java.util.Set;
 public class Resort {
     private Integer resortID;
     private String resortName;
-    private Set<Season> seasons;
+    private Set<String> seasons;
 
     public Resort(Integer resortID, String resortName) {
         this.resortID = resortID;
@@ -14,7 +14,7 @@ public class Resort {
         this.seasons = new HashSet<>();
     }
 
-    public void addSeason(Season s) {
+    public void addSeason(String s) {
         this.seasons.add(s);
     }
 
