@@ -1,7 +1,12 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 public class CmdLineParser {
 
@@ -13,8 +18,8 @@ public class CmdLineParser {
     private final int MAX_LIFTS = 60;
     private final int MAX_AVG_RIDES = 20;
 
-    private Options options;
-    private DefaultParser parser;
+    private final Options options;
+    private final DefaultParser parser;
 
     public CmdLineParser() {
         this.options = new Options();

@@ -26,21 +26,25 @@ public class ThreadDetail {
     public ThreadDetail getThreadDetail(String phase, int numThread, int numAvgRide, int numSkier) {
         switch (phase) {
             case "Phase1":
-                numThreadP = (numThread / P1_THREAD_DIVISOR) == 0 ? 1 : (numThread / P1_THREAD_DIVISOR); //16
+                numThreadP = (numThread / P1_THREAD_DIVISOR) == 0 ? 1
+                        : (numThread / P1_THREAD_DIVISOR); //16
                 numAvgRideP = (int) (numAvgRide * P1_AVG_RIDES_FACTOR); //20 * 0.2 = 4
                 numSkierPerThread = numSkier / numThreadP;
-                reqPerThread = (numAvgRideP * numSkier) / (numThreadP); // NOTE: here * numSkiers, (numRunsx0.2)x(numSkiers/(numThreads/4))
+                reqPerThread = (numAvgRideP * numSkier)
+                        / (numThreadP); // NOTE: here * numSkiers, (numRunsx0.2)x(numSkiers/(numThreads/4))
                 totalReq = numThreadP * reqPerThread;
                 break;
             case "Phase2":
-                numThreadP = (numThread / P2_THREAD_DIVISOR) == 0 ? 1 : (numThread / P2_THREAD_DIVISOR);
+                numThreadP =
+                        (numThread / P2_THREAD_DIVISOR) == 0 ? 1 : (numThread / P2_THREAD_DIVISOR);
                 numAvgRideP = (int) (numAvgRide * P2_AVG_RIDES_FACTOR);
                 numSkierPerThread = numSkier / numThreadP;
                 reqPerThread = (numAvgRideP * numSkier) / (numThreadP);
                 totalReq = numThreadP * reqPerThread;
                 break;
             case "Phase3":
-                numThreadP = (numThread / P3_THREAD_DIVISOR) == 0 ? 1 : (numThread / P3_THREAD_DIVISOR);
+                numThreadP =
+                        (numThread / P3_THREAD_DIVISOR) == 0 ? 1 : (numThread / P3_THREAD_DIVISOR);
                 numAvgRideP = (int) (numAvgRide * P3_AVG_RIDES_FACTOR);
                 numSkierPerThread = numSkier / numThreadP;
                 reqPerThread = (numAvgRideP * numSkier) / (numThreadP);

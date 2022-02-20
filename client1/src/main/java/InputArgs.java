@@ -11,7 +11,8 @@ public class InputArgs {
         this.initDefault();
     }
 
-    public InputArgs(Integer numThread, Integer numSkier, Integer numLift, Integer numAvgRide, String ipAndPort, String context) {
+    public InputArgs(Integer numThread, Integer numSkier, Integer numLift, Integer numAvgRide,
+            String ipAndPort, String context) {
         this.numThread = numThread;
         this.numSkier = numSkier;
         this.numLift = numLift;
