@@ -1,9 +1,15 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class LatencyProcessor {
+
+    private static final String CSV_FILE = "./latency_records.csv";
 
     List<LatencyRecord> latencies;
     double meanLatency;
@@ -18,8 +24,19 @@ public class LatencyProcessor {
         this.throughput = throughput;
     }
 
-    public void writeToCSV() {
+    public void writeToCSV() throws IOException {
+        FileWriter out = new FileWriter(CSV_FILE);
 
+        try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT)) {
+            this.latencies.forEach(r -> {
+                try {
+                    printer.printRecord(r.getStartTime(), r.getType(), r.getLatency(),
+                            r.getResCode());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     public void processAndPrintResults() {
@@ -56,6 +73,6 @@ public class LatencyProcessor {
 
     public long percentile(List<Long> latencies, double percentile) {
         int index = (int) Math.ceil(percentile / 100.0 * latencies.size());
-        return latencies.get(index-1);
+        return latencies.get(index - 1);
     }
 }

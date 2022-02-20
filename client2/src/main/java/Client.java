@@ -110,7 +110,7 @@ public class Client {
 
         System.out.println("\n\nReport #2:");
         LatencyProcessor p = new LatencyProcessor(latencies, throughput);
-        //p.writeToCSV();
+        p.writeToCSV();
         p.processAndPrintResults();
     }
 
