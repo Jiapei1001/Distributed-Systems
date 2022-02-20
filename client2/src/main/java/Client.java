@@ -1,4 +1,5 @@
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class Client {
@@ -34,6 +35,7 @@ public class Client {
         int resortID = 2;
         String seasonID = "2022";
         String dayID = "166";
+        List<LatencyRecord> latencies = new ArrayList<>();
 
         long start = System.currentTimeMillis();
 
@@ -49,7 +51,7 @@ public class Client {
         for (int i = 0; i < p1.numThreadP; i++) {
             int startSkierID = i * seg + 1;
             int endSkierID = i == (p1.numThreadP - 1) ? (i * seg + (numSkier - i * seg)) : (i + 1) * seg;
-            SkiThread thread = new SkiThread(startSkierID, endSkierID, P1_START_TIME, P1_END_TIME, numLift, p1.reqPerThread, DEFAULT_WAIT_TIME, basePath, resortID, seasonID, dayID, thdLatchP1, reqLatchP1, stats);
+            SkiThread thread = new SkiThread(startSkierID, endSkierID, P1_START_TIME, P1_END_TIME, numLift, p1.reqPerThread, DEFAULT_WAIT_TIME, basePath, resortID, seasonID, dayID, thdLatchP1, reqLatchP1, stats, latencies);
             thread.start();
         }
         printDetails(phase1, p1);
@@ -67,7 +69,7 @@ public class Client {
         for (int i = 0; i < p2.numThreadP; i++) {
             int startSkierID = i * seg + 1;
             int endSkierID = (i == p2.numThreadP - 1) ? (i * seg + (numSkier - i * seg)) : (i + 1) * seg;
-            SkiThread thread = new SkiThread(startSkierID, endSkierID, P2_START_TIME, P2_END_TIME, numLift, p2.reqPerThread, DEFAULT_WAIT_TIME, basePath, resortID, seasonID, dayID, thdLatchP2, reqLatchP2, stats);
+            SkiThread thread = new SkiThread(startSkierID, endSkierID, P2_START_TIME, P2_END_TIME, numLift, p2.reqPerThread, DEFAULT_WAIT_TIME, basePath, resortID, seasonID, dayID, thdLatchP2, reqLatchP2, stats, latencies);
             thread.start();
         }
         printDetails(phase2, p2);
@@ -85,7 +87,7 @@ public class Client {
         for (int i = 0; i < p3.numThreadP; i++) {
             int startSkierID = i * seg + 1;
             int endSkierID = (i == p3.numThreadP - 1) ? (i * seg + (numSkier - i * seg)) : (i + 1) * seg;
-            SkiThread thread = new SkiThread(startSkierID, endSkierID, P3_START_TIME, P3_END_TIME, numLift, p3.reqPerThread, DEFAULT_WAIT_TIME, basePath, resortID, seasonID, dayID, thdLatchP3, reqLatchP3, stats);
+            SkiThread thread = new SkiThread(startSkierID, endSkierID, P3_START_TIME, P3_END_TIME, numLift, p3.reqPerThread, DEFAULT_WAIT_TIME, basePath, resortID, seasonID, dayID, thdLatchP3, reqLatchP3, stats, latencies);
             thread.start();
         }
         printDetails(phase3, p3);
@@ -100,10 +102,16 @@ public class Client {
         long wall = end - start;
         float throughput = (float) (p1.totalReq + p2.totalReq + p3.totalReq) * 1000 / wall;
 
+        System.out.println("\n\nReport #1:");
         System.out.println("# of successful:\t\t" + stats.getSuccessfulPosts());
         System.out.println("# of fail:\t\t" + stats.getFailedPosts());
         System.out.println("wall time:\t\t" + (float)wall /1000);
         System.out.println("throughput per second:\t\t" + throughput);
+
+        System.out.println("\n\nReport #2:");
+        LatencyProcessor p = new LatencyProcessor(latencies, throughput);
+        //p.writeToCSV();
+        p.processAndPrintResults();
     }
 
     private static void printDetails(String phase, ThreadDetail p) {
