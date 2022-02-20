@@ -15,11 +15,13 @@ public class Client {
 
     private static final int DEFAULT_WAIT_TIME = 10;
 
+    private static final float SINGLE_THREAD_THROUGHPUT = 15.65f; // 15.65, single thread throughput
+
     public static void main(String[] args) throws Exception {
         // initiate default args
-        // InputArgs input = new InputArgs();
-        CmdLineParser cmdParser = new CmdLineParser();
-        InputArgs input = cmdParser.parseInputArgs(args);
+         InputArgs input = new InputArgs();
+        //CmdLineParser cmdParser = new CmdLineParser();
+        //InputArgs input = cmdParser.parseInputArgs(args);
 
         // assign
         int numThread = input.numThread;
@@ -39,9 +41,9 @@ public class Client {
         long start = System.currentTimeMillis();
 
         // phase 1: start up
-        ThreadDetail td = new ThreadDetail();
+        ThreadDetail td1 = new ThreadDetail();
         String phase1 = "Phase1";
-        ThreadDetail p1 = td.getThreadDetail(phase1, numThread, numAvgRide, numSkier);
+        ThreadDetail p1 = td1.getThreadDetail(phase1, numThread, numAvgRide, numSkier);
         CountDownLatch thdLatchP1 = new CountDownLatch((int) (p1.numThreadP * LATCH_THRESHOLD));
         CountDownLatch reqLatchP1 = new CountDownLatch(p1.totalReq);
 
@@ -61,7 +63,8 @@ public class Client {
 
         // phase 2: peak
         String phase2 = "Phase2";
-        ThreadDetail p2 = td.getThreadDetail(phase2, numThread, numAvgRide, numSkier);
+        ThreadDetail td2 = new ThreadDetail();
+        ThreadDetail p2 = td2.getThreadDetail(phase2, numThread, numAvgRide, numSkier);
         CountDownLatch thdLatchP2 = new CountDownLatch((int) (p2.numThreadP * LATCH_THRESHOLD));
         CountDownLatch reqLatchP2 = new CountDownLatch(p2.totalReq);
 
@@ -81,7 +84,8 @@ public class Client {
 
         // phase 3: cool down
         String phase3 = "Phase3";
-        ThreadDetail p3 = td.getThreadDetail(phase3, numThread, numAvgRide, numSkier);
+        ThreadDetail td3 = new ThreadDetail();
+        ThreadDetail p3 = td3.getThreadDetail(phase3, numThread, numAvgRide, numSkier);
         CountDownLatch thdLatchP3 = new CountDownLatch((int) (p3.numThreadP
                 * LATCH_THRESHOLD)); // don't call await for latchP3, just pass into constructor
         CountDownLatch reqLatchP3 = new CountDownLatch(p3.totalReq);
@@ -108,10 +112,22 @@ public class Client {
         long wall = end - start;
         float throughput = (float) (p1.totalReq + p2.totalReq + p3.totalReq) * 1000 / wall;
 
-        System.out.println("# of successful:\t\t" + stats.getSuccessfulPosts());
-        System.out.println("# of fail:\t\t" + stats.getFailedPosts());
-        System.out.println("wall time:\t\t" + (float) wall / 1000);
-        System.out.println("throughput per second:\t\t" + throughput);
+        float predictedMaxThroughput =
+                (float) (p1.totalReq + p2.totalReq + p3.totalReq) / (p1.reqPerThread
+                        + p2.reqPerThread + p3.reqPerThread) * SINGLE_THREAD_THROUGHPUT;
+        float predictedMinThroughput = (float) (SINGLE_THREAD_THROUGHPUT * numThread * ThreadDetail.P3_AVG_RIDES_FACTOR);
+        float predictedThroughput = ((float) (predictedMaxThroughput + predictedMinThroughput) / 2);
+
+        System.out.println("Throughput prediction:");
+        System.out.printf("Max throughput: \t\t %.2f\n", predictedMaxThroughput);
+        System.out.printf("Min throughput: \t\t %.2f\n", predictedMinThroughput);
+        System.out.printf("Predict throughput: \t %.2f\n", predictedThroughput);
+
+        System.out.printf("\nReport #1 (threads: %d):\n", numThread);
+        System.out.printf("# of successful:\t\t\t %d\n", stats.getSuccessfulPosts());
+        System.out.printf("# of fail:\t\t\t\t\t\t %d\n",stats.getFailedPosts());
+        System.out.printf("wall time:\t\t\t\t\t\t %.2f second\n", (float)wall /1000);
+        System.out.printf("throughput per second:\t %.2f request/second\n", throughput);
     }
 
     private static void printDetails(String phase, ThreadDetail p) {

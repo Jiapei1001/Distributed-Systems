@@ -21,13 +21,22 @@ public class InputArgs {
         this.context = context;
     }
 
+    //public void initDefault() {
+    //    this.numThread = 256;
+    //    this.numSkier = 20000;
+    //    this.numLift = 40;
+    //    this.numAvgRide = 10;
+    //    this.ipAndPort = "http://3.80.57.75:8080/";
+    //    this.context = "server_war";
+    //}
+
     public void initDefault() {
-        this.numThread = 256;
-        this.numSkier = 20000;
+        this.numThread = 128;
+        this.numSkier = 2000;
         this.numLift = 40;
         this.numAvgRide = 10;
-        this.ipAndPort = "http://localhost:8080/";
-        this.context = "server";
+        this.ipAndPort = "http://3.80.57.75:8080/";
+        this.context = "server_war";
     }
 
     public Integer getNumThread() {

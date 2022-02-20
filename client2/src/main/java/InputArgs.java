@@ -25,8 +25,8 @@ public class InputArgs {
         this.numSkier = 20000;
         this.numLift = 40;
         this.numAvgRide = 10;
-        this.ipAndPort = "http://localhost:8080/";
-        this.context = "server";
+        this.ipAndPort = "http://54.242.241.49:8080/";
+        this.context = "server_war";
     }
 
     public Integer getNumThread() {

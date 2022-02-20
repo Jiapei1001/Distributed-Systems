@@ -7,7 +7,7 @@ public class ThreadDetail {
     private static final float P2_AVG_RIDES_FACTOR = 0.6f;
 
     private static final int P3_THREAD_DIVISOR = 10;
-    private static final float P3_AVG_RIDES_FACTOR = 0.1f;
+    public static final float P3_AVG_RIDES_FACTOR = 0.1f;
 
     int numThreadP;
     int numAvgRideP;

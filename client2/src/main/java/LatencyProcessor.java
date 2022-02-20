@@ -12,6 +12,7 @@ public class LatencyProcessor {
     private static final String CSV_FILE = "./latency_records.csv";
 
     List<LatencyRecord> latencies;
+    int numThread;
     double meanLatency;
     double medianLatency;
     double throughput;
@@ -19,13 +20,14 @@ public class LatencyProcessor {
     double minLatency;
     double maxLatency;
 
-    public LatencyProcessor(List<LatencyRecord> latencies, double throughput) {
+    public LatencyProcessor(List<LatencyRecord> latencies, double throughput, int numThread) {
         this.latencies = latencies;
         this.throughput = throughput;
+        this.numThread = numThread;
     }
 
     public void writeToCSV() throws IOException {
-        FileWriter out = new FileWriter(CSV_FILE);
+        FileWriter out = new FileWriter(CSV_FILE + "_" + numThread);
 
         try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT)) {
             this.latencies.forEach(r -> {
