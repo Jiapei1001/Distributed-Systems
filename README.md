@@ -42,7 +42,7 @@ The client is ran with __32, 64, 128__ and __256 threads__, with numSkiers=20000
 
 A single request is used to estimate this latency. Follow __Little's Law__, the resulting throughput are calculated and compared.
 
-Some other generated parameters are:
+Key indexes:
 
 - __mean__ response time (millisecs)
 - __median__ response time (millisecs)
