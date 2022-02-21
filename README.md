@@ -1,4 +1,4 @@
-# Distributed Systems
+# Scalable Distributed Systems
 
 This project is intended for building a scalable distributed cloud-based system that can record all lift rides from all Upic resorts. This data can then be used as a basis for data analysis for Upic - a global acquirer of ski resorts that is homogenezing skiing around the world.
 
