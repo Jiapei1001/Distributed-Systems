@@ -2,7 +2,7 @@
 
 This project is intended for building a scalable distributed cloud-based system that can record all lift rides from all Upic resorts. This data can then be used as a basis for data analysis for Upic - a global acquirer of ski resorts that is homogenezing skiing around the world.
 
-![profile_edit](https://user-images.githubusercontent.com/20607583/154911017-72655ea2-0ab0-44fa-9e24-a81b0a15cc9e.jpeg)
+![profile_edit](https://user-images.githubusercontent.com/20607583/154911354-053248ef-2142-466d-a763-d7c2d61fabd4.jpeg)
 
 
 ## Restful API
