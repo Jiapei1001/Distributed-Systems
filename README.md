@@ -5,11 +5,13 @@ This project is intended for building a scalable distributed cloud-based system 
 
 ## Server API
 The API endpoints and model schemas follow the specifications defined in Swagger. [](https://app.swaggerhub.com/apis/cloud-perf/SkiDataAPI/1.16)
-
-API diagram
+<p align="center">
+<img width="600" alt="Swagger APIs" src="https://user-images.githubusercontent.com/20607583/154888454-ae0dc003-602d-4e20-b6b0-80c48ce2a888.png">
+</p>
 
 The server is implemented by Java servlets. JSON object is used for data transmission. Each servlet API is tested with POSTMAN.
-UML diagram
+![uml](https://user-images.githubusercontent.com/20607583/154888583-67a1417c-f4d4-4126-b062-c8b101268c24.png)
+
 
 
 The resulting .war file has been deployed to Tomcat folder under a running AWS EC2 instance.
@@ -18,16 +20,43 @@ The resulting .war file has been deployed to Tomcat folder under a running AWS E
 ## Client
 This is a multithreaded Java client that can be configured to upload a day of lift rides to the server and exert various loads on the server. 
 The client accept a set of parameters from the command line (or a parameter file) at startup. 
+
 The client will execute 3 phases, with each phase sending a large number of lift ride events to the server API.
 
-* start up - # of threads: numThreads/4. Once 20% of the threads in Phase 1 have completed, Phase 2 starts.
-* peak - # of threads: numThreads. Once 20% of the threads in Phase 2 have completed, Phase 3 starts.
-* cool down - # of threads: numThreads/10.
+* __Start Up phase__ - # of threads: numThreads/4. Once 20% of the threads in Phase 1 have completed, Phase 2 starts.
+* __Peak phase__ - # of threads: numThreads. Once 20% of the threads in Phase 2 have completed, Phase 3 starts.
+* __Cool Down phase__ - # of threads: numThreads/10.
 
-UML
+![uml](https://user-images.githubusercontent.com/20607583/154888904-46444245-3d4e-40b4-82ae-6ec6dbb0b931.png)
+
 
 CountDownLatch is used control when phase 2 and 3 starts. It is constructed by passing in how many threads are completed before releasing and proceeding into next phase. 
 
 CountDownLatch is also used at the end of 3 phases. Here I find sometimes it takes more time to call Stats object to increase or decrease # of successful or failed requests, than the API calls. This triggers the problem when printing out the results. The count of successful & failed requests is much lower than the total number of requests. The print stats method happens earlier, and the synchronized methods haven’t completed yet. To solve it, each phase also has a CountDownLatch with their total number of requests. This makes sure all the synchronized methods are completed before generating and printing out the statistic information.
 
-## Throughput
+## Throughput & Latency
+
+The client is ran with __32, 64, 128__ and __256 threads__, with numSkiers=20000, and numLifts=40. 
+
+A single request is used to estimate this latency. Follow __Little's Law__, the resulting throughput are calculated and compared.
+
+Some other generated parameters are:
+```
+mean response time (millisecs)
+median response time (millisecs)
+throughput = total number of requests/wall time (requests/second)
+p99 (99th percentile) response time
+min and max response time (millisecs)
+```
+<p float="left">
+  <img width="500" alt="p2_32" src="https://user-images.githubusercontent.com/20607583/154889597-4abc5eeb-27ff-4ae4-9546-0c5567256e3b.png"><img width="500" alt="p2_64" src="https://user-images.githubusercontent.com/20607583/154889663-d5eee0c2-249b-41b3-91f3-87bfc048a7eb.png">
+</p>
+<p float="left">
+<img width="500" alt="p2_128" src="https://user-images.githubusercontent.com/20607583/154889902-51cc5005-276b-439b-b801-993be23270b8.png"><img width="500" alt="p2_256" src="https://user-images.githubusercontent.com/20607583/154889908-9e59c0fc-a177-42b7-b50c-778572a5d705.png">
+</p>
+
+<p align="center">
+<img width="600" alt="p2_128" src="https://user-images.githubusercontent.com/20607583/154890168-d79603f8-1200-4a18-a13e-b812bb5332a5.png">
+</p>
+
+
