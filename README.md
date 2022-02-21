@@ -3,12 +3,14 @@
 This project is intended for building a scalable distributed cloud-based system that can record all lift rides from all Upic resorts. This data can then be used as a basis for data analysis for Upic - a global acquirer of ski resorts that is homogenezing skiing around the world.
 
 
-## Server & API
-The API endpoints and model schemas follow the specifications defined in Swagger. [](https://app.swaggerhub.com/apis/cloud-perf/SkiDataAPI/1.16)
+## Restful API
+The API endpoints and model schemas are implemented by client's specifications . [](https://app.swaggerhub.com/apis/cloud-perf/SkiDataAPI/1.16)
 <p align="center">
 <img width="600" alt="Swagger APIs" src="https://user-images.githubusercontent.com/20607583/154888454-ae0dc003-602d-4e20-b6b0-80c48ce2a888.png">
 </p>
 
+
+## Server
 The server is implemented by Java servlets. JSON object is used for data transmission. Each servlet API is tested with POSTMAN.
 ![uml](https://user-images.githubusercontent.com/20607583/154888583-67a1417c-f4d4-4126-b062-c8b101268c24.png)
 
@@ -41,13 +43,13 @@ The client is ran with __32, 64, 128__ and __256 threads__, with numSkiers=20000
 A single request is used to estimate this latency. Follow __Little's Law__, the resulting throughput are calculated and compared.
 
 Some other generated parameters are:
-```
-mean response time (millisecs)
-median response time (millisecs)
-throughput = total number of requests/wall time (requests/second)
-p99 (99th percentile) response time
-min and max response time (millisecs)
-```
+
+- __mean__ response time (millisecs)
+- __median__ response time (millisecs)
+- __throughput__ = total number of requests/wall time (requests/second)
+- __p99__ (99th percentile) response time
+- __min__ and max response time (millisecs)
+
 
 <p align="center">
 <img width="600" alt="p2_128" src="https://user-images.githubusercontent.com/20607583/154889902-51cc5005-276b-439b-b801-993be23270b8.png">
