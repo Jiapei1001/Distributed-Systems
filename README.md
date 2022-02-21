@@ -48,15 +48,12 @@ throughput = total number of requests/wall time (requests/second)
 p99 (99th percentile) response time
 min and max response time (millisecs)
 ```
-<p float="left">
-  <img width="500" alt="p2_32" src="https://user-images.githubusercontent.com/20607583/154889597-4abc5eeb-27ff-4ae4-9546-0c5567256e3b.png"><img width="500" alt="p2_64" src="https://user-images.githubusercontent.com/20607583/154889663-d5eee0c2-249b-41b3-91f3-87bfc048a7eb.png">
-</p>
-<p float="left">
-<img width="500" alt="p2_128" src="https://user-images.githubusercontent.com/20607583/154889902-51cc5005-276b-439b-b801-993be23270b8.png"><img width="500" alt="p2_256" src="https://user-images.githubusercontent.com/20607583/154889908-9e59c0fc-a177-42b7-b50c-778572a5d705.png">
+
+<p align="center">
+<img width="600" alt="p2_128" src="https://user-images.githubusercontent.com/20607583/154889902-51cc5005-276b-439b-b801-993be23270b8.png">
 </p>
 
 <p align="center">
 <img width="600" alt="p2_128" src="https://user-images.githubusercontent.com/20607583/154890168-d79603f8-1200-4a18-a13e-b812bb5332a5.png">
 </p>
-
 
