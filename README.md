@@ -46,7 +46,7 @@ Some other generated parameters are:
 
 - __mean__ response time (millisecs)
 - __median__ response time (millisecs)
-- __throughput__ = total number of requests/wall time (requests/second)
+- __throughput__, total number of requests/wall time (requests/second)
 - __p99__ (99th percentile) response time
 - __min__ and max response time (millisecs)
 
