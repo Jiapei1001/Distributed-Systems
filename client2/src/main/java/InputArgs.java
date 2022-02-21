@@ -21,11 +21,11 @@ public class InputArgs {
     }
 
     public void initDefault() {
-        this.numThread = 256;
-        this.numSkier = 20000;
+        this.numThread = 1;
+        this.numSkier = 200;
         this.numLift = 40;
         this.numAvgRide = 10;
-        this.ipAndPort = "http://54.242.241.49:8080/";
+        this.ipAndPort = "http://50.16.161.88:8080/";
         this.context = "server_war";
     }
 

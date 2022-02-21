@@ -112,18 +112,18 @@ public class Client {
         float predictedMinThroughput = (float) (SINGLE_THREAD_THROUGHPUT * numThread * ThreadDetail.P3_AVG_RIDES_FACTOR);
         float predictedThroughput = ((float) (predictedMaxThroughput + predictedMinThroughput) / 2);
 
-        System.out.println("Throughput prediction:");
-        System.out.printf("Max throughput: \t\t %.2f\n", predictedMaxThroughput);
-        System.out.printf("Min throughput: \t\t %.2f\n", predictedMinThroughput);
-        System.out.printf("Predict throughput: \t %.2f\n", predictedThroughput);
-
         System.out.printf("\nReport #1 (threads: %d):\n", numThread);
         System.out.printf("# of successful:\t\t\t %d\n", stats.getSuccessfulPosts());
         System.out.printf("# of fail:\t\t\t\t\t\t %d\n",stats.getFailedPosts());
         System.out.printf("wall time:\t\t\t\t\t\t %.2f second\n", (float)wall /1000);
         System.out.printf("throughput per second:\t %.2f request/second\n", throughput);
 
-        System.out.printf("\n\nReport #2 (threads: %d):\n", numThread);
+        System.out.println("\nThroughput prediction:");
+        System.out.printf("Max throughput: \t\t %.2f\n", predictedMaxThroughput);
+        System.out.printf("Min throughput: \t\t %.2f\n", predictedMinThroughput);
+        System.out.printf("Predict throughput: \t %.2f\n", predictedThroughput);
+
+        System.out.printf("\nReport #2 (threads: %d):\n", numThread);
         LatencyProcessor p = new LatencyProcessor(latencies, throughput, numThread);
         p.writeToCSV();
         p.processAndPrintResults();

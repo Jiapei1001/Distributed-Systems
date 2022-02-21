@@ -19,9 +19,9 @@ public class Client {
 
     public static void main(String[] args) throws Exception {
         // initiate default args
-         InputArgs input = new InputArgs();
-        //CmdLineParser cmdParser = new CmdLineParser();
-        //InputArgs input = cmdParser.parseInputArgs(args);
+        // InputArgs input = new InputArgs();
+        CmdLineParser cmdParser = new CmdLineParser();
+        InputArgs input = cmdParser.parseInputArgs(args);
 
         // assign
         int numThread = input.numThread;
