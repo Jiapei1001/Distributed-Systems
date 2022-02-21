@@ -3,7 +3,7 @@
 This project is intended for building a scalable distributed cloud-based system that can record all lift rides from all Upic resorts. This data can then be used as a basis for data analysis for Upic - a global acquirer of ski resorts that is homogenezing skiing around the world.
 
 
-## Server API
+## Server & API
 The API endpoints and model schemas follow the specifications defined in Swagger. [](https://app.swaggerhub.com/apis/cloud-perf/SkiDataAPI/1.16)
 <p align="center">
 <img width="600" alt="Swagger APIs" src="https://user-images.githubusercontent.com/20607583/154888454-ae0dc003-602d-4e20-b6b0-80c48ce2a888.png">
