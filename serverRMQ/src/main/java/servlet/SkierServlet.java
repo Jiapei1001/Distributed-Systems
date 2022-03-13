@@ -2,22 +2,36 @@ package servlet;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.MessageProperties;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.annotation.*;
-import java.io.IOException;
-import model.ResponseMsg;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import model.LiftRide;
+import model.ResponseMsg;
 import model.SkierVertical;
+import org.apache.commons.pool2.ObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 
 
 @WebServlet(name = "SkierServlet", value = "/SkierServlet")
 public class SkierServlet extends HttpServlet {
+
+    private static final String SKIER_QUEUE_NAME = "skier_message_queue";
+    private ObjectPool<Channel> channelPool;
+
+    public void init() {
+        this.channelPool = new GenericObjectPool<>(new ChannelPool());
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -84,7 +98,8 @@ public class SkierServlet extends HttpServlet {
         // valid ride
         // urlParts = [, 1, seasons, 2019, day, 1, skier, 123]
         // convert request body to a map
-        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Type type = new TypeToken<Map<String, String>>() {
+        }.getType();
         Map<String, String> reqBody = gson.fromJson(request.getReader(), type);
 
         LiftRide ride = new LiftRide(
@@ -96,9 +111,68 @@ public class SkierServlet extends HttpServlet {
                 Integer.parseInt(reqBody.get("liftID")),
                 Integer.parseInt(reqBody.get("waitTime")));
 
-        // TODO: process lift ride
-        // TODO: if valid, format the incoming data and send it as a payload to queue
+        // Gson loads request's payload into a separate class
+        /*
+        LiftRidePayload payload = gson.fromJson(request.getReader(), LiftRidePayload.class);
+        LiftRide ride = new LiftRide(
+                Integer.parseInt(urlPath[1]),
+                urlPath[3],
+                urlPath[5],
+                Integer.parseInt(urlPath[7]),
+                payload.getTime(),
+                payload.getLiftID(),
+                payload.getWaitTime());
+         */
 
+        // if lift ride is valid, format the incoming data and send it as a message to rabbit message queue
+        Channel channel = null;
+        try {
+            // https://commons.apache.org/proper/commons-pool/guide/index.html
+            // The default behavior is for the pool to act as a LIFO queue.
+            // When there are idle objects available in the pool, borrowObject returns the most recently returned ("last in") instance.
+            channel = this.channelPool.borrowObject();
+            // https://www.rabbitmq.com/tutorials/tutorial-two-java.html
+            channel.queueDeclare(SKIER_QUEUE_NAME, true, false, false, null);
+            String message = ride.toString();
+            channel.basicPublish("",
+                    SKIER_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(
+                            StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            // Channels and error handling - https://www.rabbitmq.com/channels.html
+            // TODO: confirm if throw exception is needed, or print stack trace is ok. If so, would it block sending messages?
+            try {
+                throw new Exception(e.getCause().getMessage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                if (channel != null) {
+                    this.channelPool.returnObject(channel);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // From RabbitMQ tutorials
+        /*
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        // factory.setPort(5672);
+        try (Connection connection = factory.newConnection();
+                Channel channel = connection.createChannel()) {
+
+            channel.queueDeclare(SKIER_QUEUE_NAME, true, false, false, null);
+            String message = "1234";
+
+            channel.basicPublish("", SKIER_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(
+                    StandardCharsets.UTF_8));
+            System.out.println("Sent: " + message);
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+        */
 
         response.setStatus(HttpServletResponse.SC_CREATED);
     }
