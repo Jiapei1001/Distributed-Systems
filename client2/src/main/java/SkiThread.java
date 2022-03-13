@@ -30,6 +30,9 @@ public class SkiThread extends Thread {
     private final Stats stats;
     private List<LatencyRecord> latencies;
 
+    private int successfulReqCntLocal = 0;
+    private int failedReqCntLocal = 0;
+
     public SkiThread(Integer startSkierID, Integer endSkierID, Integer startTime,
             Integer endTime, Integer numLifts, Integer totalRequest,
             Integer waitTime, String basePath, Integer resortID, String seasonID,
@@ -80,7 +83,8 @@ public class SkiThread extends Thread {
                     long startTime = System.currentTimeMillis();
                     ApiResponse<Void> res = apiInstance.writeNewLiftRideWithHttpInfo(ride, resortID, seasonID, dayID, rdSkierID);
                     success = true;
-                    stats.incrementSuccessfulPost(1);
+                    // stats.incrementSuccessfulPost(1);
+                    successfulReqCntLocal++;
                     long endTime = System.currentTimeMillis();
                     this.latencies.add(new LatencyRecord(startTime, REQUEST.POST, endTime - startTime, res.getStatusCode()));
                     break;
@@ -89,19 +93,17 @@ public class SkiThread extends Thread {
                 }
             }
             if (!success) {
-                stats.incrementFailedPost(1);
-            }
-            // count down request latch
-            try {
-                reqLatch.countDown();
-            } catch (Exception e) {
-                e.printStackTrace();
+                failedReqCntLocal++;
+                // stats.incrementFailedPost(1);
             }
         }
 
         // count down thread latch after processing all requests
         try {
+            stats.incrementSuccessfulPost(successfulReqCntLocal);
+            stats.incrementFailedPost(failedReqCntLocal);
             threadLatch.countDown();
+            reqLatch.countDown();
         } catch (Exception e) {
             e.printStackTrace();
         }

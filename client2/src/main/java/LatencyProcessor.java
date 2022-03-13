@@ -9,7 +9,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class LatencyProcessor {
 
-    private static final String CSV_FILE = "./latency_records.csv";
+    private static final String CSV_FILE = "./latency_records";
 
     List<LatencyRecord> latencies;
     int numThread;
@@ -27,7 +27,7 @@ public class LatencyProcessor {
     }
 
     public void writeToCSV() throws IOException {
-        FileWriter out = new FileWriter(CSV_FILE + "_" + numThread);
+        FileWriter out = new FileWriter(CSV_FILE + "_" + numThread + ".csv");
 
         try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT)) {
             this.latencies.forEach(r -> {

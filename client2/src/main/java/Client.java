@@ -1,6 +1,11 @@
+import static java.lang.Thread.sleep;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class Client {
 
@@ -21,9 +26,9 @@ public class Client {
 
     public static void main(String[] args) throws Exception {
         // initiate default args
-        // InputArgs input = new InputArgs();
-        CmdLineParser cmdParser = new CmdLineParser();
-        InputArgs input = cmdParser.parseInputArgs(args);
+        InputArgs input = new InputArgs();
+        // CmdLineParser cmdParser = new CmdLineParser();
+        // InputArgs input = cmdParser.parseInputArgs(args);
 
         // assign
         int numThread = input.numThread;
@@ -46,7 +51,7 @@ public class Client {
         ThreadDetail td1 = new ThreadDetail();
         ThreadDetail p1 = td1.getThreadDetail(phase1, numThread, numAvgRide, numSkier);
         CountDownLatch thdLatchP1 = new CountDownLatch((int) (p1.numThreadP * LATCH_THRESHOLD));
-        CountDownLatch reqLatchP1 = new CountDownLatch(p1.totalReq);
+        CountDownLatch reqLatchP1 = new CountDownLatch(p1.numThreadP);
 
 
         int seg = p1.numSkierPerThread;
@@ -65,7 +70,7 @@ public class Client {
         ThreadDetail td2 = new ThreadDetail();
         ThreadDetail p2 = td2.getThreadDetail(phase2, numThread, numAvgRide, numSkier);
         CountDownLatch thdLatchP2 = new CountDownLatch((int) (p2.numThreadP * LATCH_THRESHOLD));
-        CountDownLatch reqLatchP2 = new CountDownLatch(p2.totalReq);
+        CountDownLatch reqLatchP2 = new CountDownLatch(p2.numThreadP);
 
 
         seg = p2.numSkierPerThread;
@@ -84,7 +89,7 @@ public class Client {
         ThreadDetail td3 = new ThreadDetail();
         ThreadDetail p3 = td3.getThreadDetail(phase3, numThread, numAvgRide, numSkier);
         CountDownLatch thdLatchP3 = new CountDownLatch((int) (p3.numThreadP * LATCH_THRESHOLD)); // don't call await for latchP3, just pass into constructor
-        CountDownLatch reqLatchP3 = new CountDownLatch(p3.totalReq);
+        CountDownLatch reqLatchP3 = new CountDownLatch(p3.numThreadP);
 
 
         seg = p3.numSkierPerThread;
@@ -124,9 +129,10 @@ public class Client {
         System.out.printf("Predict throughput: \t %.2f\n", predictedThroughput);
 
         System.out.printf("\nReport #2 (threads: %d):\n", numThread);
+
         LatencyProcessor p = new LatencyProcessor(latencies, throughput, numThread);
-        p.writeToCSV();
         p.processAndPrintResults();
+        p.writeToCSV();
     }
 
     private static void printDetails(String phase, ThreadDetail p) {

@@ -21,11 +21,11 @@ public class InputArgs {
     }
 
     public void initDefault() {
-        this.numThread = 1;
-        this.numSkier = 200;
+        this.numThread = 256;
+        this.numSkier = 20000;
         this.numLift = 40;
         this.numAvgRide = 10;
-        this.ipAndPort = "http://50.16.161.88:8080/";
+        this.ipAndPort = "http://3.91.9.78:8080/";
         this.context = "server_war";
     }
 
@@ -76,4 +76,5 @@ public class InputArgs {
     public void setContext(String context) {
         this.context = context;
     }
+
 }
