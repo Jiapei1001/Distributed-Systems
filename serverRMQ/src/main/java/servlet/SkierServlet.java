@@ -133,9 +133,9 @@ public class SkierServlet extends HttpServlet {
             channel = this.channelPool.borrowObject();
             // https://www.rabbitmq.com/tutorials/tutorial-two-java.html
             channel.queueDeclare(SKIER_QUEUE_NAME, true, false, false, null);
-            String message = ride.toString();
+            String json = gson.toJson(ride);
             channel.basicPublish("",
-                    SKIER_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(
+                    SKIER_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes(
                             StandardCharsets.UTF_8));
         } catch (Exception e) {
             // Channels and error handling - https://www.rabbitmq.com/channels.html

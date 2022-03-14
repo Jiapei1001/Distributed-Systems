@@ -21,11 +21,11 @@ public class InputArgs {
     }
 
     public void initDefault() {
-        this.numThread = 256;
-        this.numSkier = 2000;
+        this.numThread = 512;
+        this.numSkier = 20000;
         this.numLift = 40;
         this.numAvgRide = 10;
-        this.ipAndPort = "http://18.215.163.145:8080/";
+        this.ipAndPort = "http://servers-load-balancer-1347539645.us-east-1.elb.amazonaws.com:8080/";
         this.context = "server_war";
         // this.ipAndPort = "http://localhost:8080/";
         // this.context = "server";

@@ -7,9 +7,11 @@ import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 
+// ChannelPool based on Apache Commons Pool
+// https://commons.apache.org/proper/commons-pool/examples.html
 public class ChannelPool extends BasePooledObjectFactory<Channel> {
 
-    private static final String HOST = "18.233.158.204";
+    private static final String HOST = "3.83.152.143";
     // private static final String HOST = "localhost";
     private static final int PORT = 5672;
     private final ConnectionFactory connFactory = new ConnectionFactory();
@@ -17,9 +19,10 @@ public class ChannelPool extends BasePooledObjectFactory<Channel> {
     @Override
     public Channel create() throws Exception {
         // Java Client - https://www.rabbitmq.com/api-guide.html
+        // this.connFactory.setHost("localhost");
+
         this.connFactory.setHost(HOST);
         this.connFactory.setPort(PORT);
-        // don't set username and password
         this.connFactory.setUsername("admin123456");
         this.connFactory.setPassword("123456");
 
