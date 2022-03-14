@@ -21,7 +21,7 @@ public class InputArgs {
     }
 
     public void initDefault() {
-        this.numThread = 512;
+        this.numThread = 64;
         this.numSkier = 20000;
         this.numLift = 40;
         this.numAvgRide = 10;
