@@ -12,6 +12,11 @@ The API endpoints and model schemas are implemented by client's specifications .
 </p>
 
 
+## Message Processing
+
+![A2_server_diagram](https://user-images.githubusercontent.com/20607583/158247392-8271d8b2-d236-4a67-b65e-243c13d10904.png)
+
+
 ## Server
 The server is implemented by Java servlets. JSON object is used for data transmission. Each servlet API is tested with POSTMAN.
 ![uml](https://user-images.githubusercontent.com/20607583/154888583-67a1417c-f4d4-4126-b062-c8b101268c24.png)
