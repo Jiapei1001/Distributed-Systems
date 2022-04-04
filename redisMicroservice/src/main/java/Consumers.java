@@ -6,10 +6,10 @@ import redis.clients.jedis.JedisPoolConfig;
 
 public class Consumers {
 
-    private static final String HOST = "3.83.152.143";
-    private static final int PORT = 5672;
-    private static final String USER = "admin";
-    private static final String PASSWORD = "admin";
+    private static final String MQ_HOST = "3.83.152.143";
+    private static final int MQ_PORT = 5672;
+    private static final String MQ_USER = "admin";
+    private static final String MQ_PASSWORD = "admin";
 
     private static final String REDIS_HOST = "127.0.0.1";
     private static final int REDIS_PORT = 6379;
@@ -28,6 +28,7 @@ public class Consumers {
             // Using too small a value here can lead to performance problems, too big and you have wasted resources.
             int maxConnections = 512;
             poolConfig.setMaxTotal(maxConnections);
+
             int maxIdle = 256;
             poolConfig.setMaxIdle(maxIdle);
 
@@ -64,10 +65,10 @@ public class Consumers {
         ConnectionFactory factory = new ConnectionFactory();
 
         // factory.setHost("localhost");
-        factory.setHost(HOST);
-        factory.setPort(PORT);
-        factory.setUsername(USER);
-        factory.setPassword(PASSWORD);
+        factory.setHost(MQ_HOST);
+        factory.setPort(MQ_PORT);
+        factory.setUsername(MQ_USER);
+        factory.setPassword(MQ_PASSWORD);
 
         // Reference - https://github.com/gortonator/bsds-6650/blob/master/code/week-2/producerconsumerex/ProducerConsumerEx.java
         // Alternative way is to initiate and define a Runnable in this main class
@@ -77,6 +78,5 @@ public class Consumers {
 
             new Thread(new SkierConsumer(channel, jedisPool)).start();
         }
-
     }
 }
