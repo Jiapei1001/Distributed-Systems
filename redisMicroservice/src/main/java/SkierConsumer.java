@@ -36,12 +36,12 @@ public class SkierConsumer implements Runnable {
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             };
 
-            channel.basicConsume(SKIER_QUEUE_NAME, false, deliverCallback, consumerTag -> {});
+            channel.basicConsume(SKIER_QUEUE_NAME, false, deliverCallback, consumerTag -> {
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 
     private void process(String message) {
         // JsonObject json = this.gson.fromJson(message, JsonObject.class);
@@ -66,50 +66,13 @@ public class SkierConsumer implements Runnable {
             // For skier N, show me the lifts they rode on each ski day
             // Redis LIST, append the liftRide to the list of the key, SkierN_SkiDay
             // append the liftRide to a list
-            String Skier_Season_Day = "Skier_" + r.skierID + "_Season_" + r.seasonID + "_Day_" + r.dayID;
+            String Skier_Season_Day =
+                    "Skier_" + r.skierID + "_Season_" + r.seasonID + "_Day_" + r.dayID;
             jedis.rpush(Skier_Season_Day, r.toString());
         }
 
         // Redis LIST, append to the key, SkierN
-        System.out.println(r.toString());
+        System.out.println(r);
         System.out.println(" [" + r.skierID + "] Done");
     }
-
-    /*
-    private void process(String message) {
-        // JsonObject json = this.gson.fromJson(message, JsonObject.class);
-        model.LiftRide ride = this.gson.fromJson(message, model.LiftRide.class);
-
-        // String skierID = String.valueOf(json.get("skierID"));
-        // String seasonID = String.valueOf(json.get("seasonID"));
-        // String dayID = String.valueOf(json.get("dayID"));
-        // String liftID = String.valueOf(json.get("liftID"));
-
-        // Interactive Guide - https://try.redis.io/
-        // Jedis JSON - https://github.com/redis/jedis/blob/master/docs/redisjson.md
-        // Here the try block avoid closing the resource, or there is a need of adding Finally
-        // try (Jedis jedis = this.jedisPool.getResource()) {
-        //     // For skier N, how many days have they skied this season?
-        //     // SkierN_Season, a SET that stores the days. As the elements in the set is unique, we can use the set's size to answer the question above.
-        //     String SkierN_Season = skierID + "_" + seasonID;
-        //     jedis.sadd(SkierN_Season, dayID);
-        //
-        //     // For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
-        //     // Redis HASH, SkierN -> skiDay : vertical.
-        //     // HINCRBY, HGETALL, HKEYS, HVALS
-        //     int increment = Integer.parseInt(liftID) * 10;
-        //     jedis.hincrBy(skierID, dayID, increment);
-        //
-        //     // For skier N, show me the lifts they rode on each ski day
-        //     // Redis LIST, append the liftRide to the list of the key, SkierN_SkiDay
-        //     // append the liftRide to a list
-        //     String SkierN_Day = skierID + "_" + dayID;
-        //     jedis.rpush(SkierN_Day, json.toString());
-        // }
-
-        // Redis LIST, append to the key, SkierN
-        // System.out.println(json.toString());
-        // System.out.println(" [" + skierID + "] Done");
-    }
-    */
 }
