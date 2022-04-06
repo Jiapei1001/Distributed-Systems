@@ -4,6 +4,7 @@ import io.swagger.client.ApiResponse;
 import io.swagger.client.api.SkiersApi;
 import io.swagger.client.model.LiftRide;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -22,8 +23,8 @@ public class SkiThread extends Thread {
     private final String basePath;
 
     private final Integer resortID;
-    private final String seasonID;
-    private final String dayID;
+    private String seasonID;
+    private String dayID;
 
     private final CountDownLatch threadLatch;
     private final CountDownLatch reqLatch;
@@ -32,6 +33,8 @@ public class SkiThread extends Thread {
 
     private int successfulReqCntLocal = 0;
     private int failedReqCntLocal = 0;
+
+    private final Random rand;
 
     public SkiThread(Integer startSkierID, Integer endSkierID, Integer startTime,
             Integer endTime, Integer numLifts, Integer totalRequest,
@@ -52,6 +55,8 @@ public class SkiThread extends Thread {
         this.reqLatch = reqLatch;
         this.stats = stats;
         this.latencies = latencies;
+
+        this.rand = new Random();
     }
 
     @Override
@@ -75,6 +80,10 @@ public class SkiThread extends Thread {
             ride.setTime(rdTime);
             ride.setLiftID(rdLiftID);
             ride.setWaitTime(rdWaitTime);
+
+            // randomize they ski seasonID and dayID
+            this.seasonID = String.valueOf(2000 + rand.nextInt(3));
+            this.dayID = String.valueOf(1 + rand.nextInt(365));
 
             int j = 0;
             boolean success = false;
