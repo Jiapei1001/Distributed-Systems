@@ -25,10 +25,10 @@ public class InputArgs {
         this.numSkier = 20000;
         this.numLift = 40;
         this.numAvgRide = 10;
-        // this.ipAndPort = "http://servers-load-balancer-1347539645.us-east-1.elb.amazonaws.com:8080/";
-        // this.context = "server_war";
-        this.ipAndPort = "http://localhost:8080/";
-        this.context = "server";
+        this.ipAndPort = "http://servers-load-balancer-1347539645.us-east-1.elb.amazonaws.com:8080/";
+        this.context = "server_war";
+        // this.ipAndPort = "http://localhost:8080/";
+        // this.context = "server";
     }
 
     public Integer getNumThread() {

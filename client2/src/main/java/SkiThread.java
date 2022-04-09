@@ -82,7 +82,7 @@ public class SkiThread extends Thread {
             ride.setWaitTime(rdWaitTime);
 
             // randomize they ski seasonID and dayID
-            this.seasonID = String.valueOf(2000 + rand.nextInt(3));
+            this.seasonID = String.valueOf(2020 + rand.nextInt(3)); // 2020-2022
             this.dayID = String.valueOf(1 + rand.nextInt(365));
 
             int j = 0;
