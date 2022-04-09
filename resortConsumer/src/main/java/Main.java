@@ -1,9 +1,9 @@
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import model.LiftRideDao;
+import model.LiftRideDaoResort;
 
-public class Consumer {
+public class Main {
 
     // private static final String MQ_HOST = "localhost";  // "127.0.0.1"
     private static final String MQ_HOST = "3.86.161.121";
@@ -14,26 +14,21 @@ public class Consumer {
     private static final int NUM_THREADS = 512;
 
     public static void main(String[] args) throws Exception {
-        // NOTE: JedisFactory.getInstance() factory method is not thread-safe.
-        // the pool instance is thread safe
-        LiftRideDao liftRideDao = new LiftRideDao();
+        // Jedis connection
+        LiftRideDaoResort daoResort = new LiftRideDaoResort();
 
-        // ConnectionFactory for RabbitMQ
+        // RabbitMQ connection
         ConnectionFactory factory = new ConnectionFactory();
-
-        // factory.setHost("localhost");
         factory.setHost(MQ_HOST);
         factory.setPort(MQ_PORT);
         factory.setUsername(MQ_USER);
         factory.setPassword(MQ_PASSWORD);
 
-        // Reference - https://github.com/gortonator/bsds-6650/blob/master/code/week-2/producerconsumerex/ProducerConsumerEx.java
-        // Alternative way is to initiate and define a Runnable in this main class
         Connection conn = factory.newConnection();
         for (int i = 0; i < NUM_THREADS; i++) {
             Channel channel = conn.createChannel();
 
-            new Thread(new SkierConsumer(channel, liftRideDao)).start();
+            new Thread(new ResortConsumer(channel, daoResort)).start();
         }
     }
 }
