@@ -25,10 +25,12 @@ public class SkierConsumer implements Runnable {
 
         try {
             channel.queueDeclare(SKIER_QUEUE_NAME, true, false, false, null);
-            System.out.println(" [*] Waiting for skier messages. To exit press CTRL+C");
+            System.out.println(" [*] Waiting for skier messages for skier db. To exit press CTRL+C");
 
             // basic.qos method to make it possible to limit the number of unacknowledged messages on a channel (or connection) when consuming (aka "prefetch count").
             channel.basicQos(1);
+
+            boolean autoAck = false;
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
@@ -37,8 +39,7 @@ public class SkierConsumer implements Runnable {
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             };
 
-            channel.basicConsume(SKIER_QUEUE_NAME, false, deliverCallback, consumerTag -> {
-            });
+            channel.basicConsume(SKIER_QUEUE_NAME, autoAck, deliverCallback, consumerTag -> {});
         } catch (IOException e) {
             Logger.getLogger(SkierConsumer.class.getName()).log(Level.INFO, e.getMessage());
         }
