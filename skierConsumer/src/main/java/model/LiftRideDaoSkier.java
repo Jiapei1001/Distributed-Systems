@@ -97,12 +97,11 @@ public class LiftRideDaoSkier {
         System.out.println(" [" + r.skierID + "] Done");
     }
 
-
     // Query #1 - For skier N, how many days have they skied this season?
     public int getSkiDaysThisSeason(String skierID, String seasonID) {
         long res = -1;
 
-        String Skier_Season = "Skier_" + skierID + "_Season_" + seasonID;
+        String Skier_Season = "Skier_" + skierID + "_" + seasonID;
         try (Jedis jedis = jedisPool.getResource()) {
             // set length
             res = jedis.llen(Skier_Season);
@@ -128,7 +127,7 @@ public class LiftRideDaoSkier {
     public Set<String> getLifts(String skierID, String seasonID, String dayID) {
         Set<String> res = new HashSet<>();
 
-        String Skier_Season_Day = "Skier_" + skierID + "_Season_" + seasonID + "_Day_" + dayID;
+        String Skier_Season_Day = "Skier_" + skierID + "_" + seasonID + "_" + dayID;
         try (Jedis jedis = jedisPool.getResource()) {
             // set members
             res = jedis.smembers(Skier_Season_Day);
