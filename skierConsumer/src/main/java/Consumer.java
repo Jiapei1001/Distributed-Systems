@@ -3,7 +3,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import model.LiftRideDao;
 
-public class Consumers {
+public class Consumer {
 
     // private static final String MQ_HOST = "localhost";  // "127.0.0.1"
     private static final String MQ_HOST = "3.86.161.121";
