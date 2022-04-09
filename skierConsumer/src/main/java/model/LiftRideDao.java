@@ -1,7 +1,10 @@
 package model;
 
+import com.google.gson.Gson;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.exceptions.JedisException;
 
 public class LiftRideDao {
     // private static final String REDIS_HOST = "localhost";   // "127.0.0.1"
@@ -10,9 +13,11 @@ public class LiftRideDao {
 
     private static JedisPoolConfig poolConfig;
     private static JedisPool jedisPool;
+    private final Gson gson;
 
     public LiftRideDao() throws Exception {
         initialJedisPool();
+        this.gson = new Gson();
     }
 
     public JedisPool getJedisPool() {
@@ -20,21 +25,18 @@ public class LiftRideDao {
     }
 
     // How to avoid failure when connecting to Redis instance?
-    // Open and add port number to the instance's security group
-
-    // Redis config: 1. comment out BIN 127.0.0.1; 2. protected-mode no
-    // https://stackoverflow.com/questions/37867633/cannot-connect-to-redis-using-jedis
-
-    // Increase connection timeout, default is 2000 ms
-    // https://stackoverflow.com/questions/14993644/configure-jedis-timeout
-
-    // Jedis Config - https://gist.github.com/JonCole/925630df72be1351b21440625ff2671f
+    // 1.   Open and add port number to the instance's security group
+    // 2.   Redis config: 1. comment out BIN 127.0.0.1; 2. protected-mode no
+    //      https://stackoverflow.com/questions/37867633/cannot-connect-to-redis-using-jedis
+    // 3.   Increase connection timeout, default is 2000 ms
+    //      https://stackoverflow.com/questions/14993644/configure-jedis-timeout
     private static void initialJedisPool() throws Exception {
         try {
             // Easier way of using connection pool
             // Reference - https://github.com/redis/jedis
             // JedisPooled jedis = new JedisPooled("127.0.0.1", 6379);
 
+            // Jedis Config - https://gist.github.com/JonCole/925630df72be1351b21440625ff2671f
             // the above simple JedisPooled way doesn't work for poolConfig, thus still need to use try block
             poolConfig = new JedisPoolConfig();
 
@@ -63,5 +65,44 @@ public class LiftRideDao {
         } catch (Exception e) {
             throw new Exception("First create JedisPool error : " + e);
         }
+    }
+
+    // process and save message to db
+    public void process(String message) {
+        // JsonObject json = this.gson.fromJson(message, JsonObject.class);
+        LiftRide r = this.gson.fromJson(message, LiftRide.class);
+
+        Jedis jedis = jedisPool.getResource();
+        try {
+            // For skier N, how many days have they skied this season?
+            // SkierN_Season, a SET that stores the days. As the elements in the set is unique, we can use the set's size to answer the question above.
+            String Skier_Season = "Skier_" + r.skierID + "_Season_" + r.seasonID;
+            jedis.sadd(Skier_Season, r.dayID);
+
+            // For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
+            // Redis HASH, SkierN -> skiDay : vertical.
+            // HINCRBY, HGETALL, HKEYS, HVALS
+            int increment = r.liftID * 10;
+            String Skier = "Skier_" + r.skierID;
+            jedis.hincrBy(Skier, r.seasonID + "_" + r.dayID, increment);
+
+            // For skier N, show me the lifts they rode on each ski day
+            // Redis SET, append the liftRide to the set of the key
+            String Skier_Season_Day =
+                    "Skier_" + r.skierID + "_Season_" + r.seasonID + "_Day_" + r.dayID;
+            jedis.sadd(Skier_Season_Day, r.liftID.toString());
+
+        } catch (JedisException e) {
+            if (jedis != null) {
+                jedisPool.returnBrokenResource(jedis);
+                jedis = null;
+            }
+        } finally {
+            jedisPool.returnResource(jedis);
+        }
+
+        // Redis LIST, append to the key, SkierN
+        System.out.println(r);
+        System.out.println(" [" + r.skierID + "] Done");
     }
 }
