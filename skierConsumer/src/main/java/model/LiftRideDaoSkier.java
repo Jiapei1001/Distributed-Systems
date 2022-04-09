@@ -7,17 +7,17 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-public class LiftRideDao {
+public class LiftRideDaoSkier {
 
-    // private static final String REDIS_HOST = "localhost";   // "127.0.0.1"
-    private static final String REDIS_HOST = "35.170.200.33";
-    private static final int REDIS_PORT = 6379;
+    // private static final String SKIER_REDIS_HOST = "localhost";   // "127.0.0.1"
+    private static final String SKIER_REDIS_HOST = "35.170.200.33";
+    private static final int SKIER_REDIS_PORT = 6379;
 
     private static JedisPoolConfig poolConfig;
     private static JedisPool jedisPool;
     private final Gson gson;
 
-    public LiftRideDao() throws Exception {
+    public LiftRideDaoSkier() throws Exception {
         initialJedisPool();
         this.gson = new Gson();
     }
@@ -57,7 +57,7 @@ public class LiftRideDao {
             // // Increase this value when you see pool.getResource() taking a long time to complete under burst scenarios
             poolConfig.setMinIdle(10240);
 
-            jedisPool = new JedisPool(poolConfig, REDIS_HOST, REDIS_PORT, 10 * 1000);
+            jedisPool = new JedisPool(poolConfig, SKIER_REDIS_HOST, SKIER_REDIS_PORT, 10 * 1000);
             // jedisPool = new JedisPool(REDIS_HOST, REDIS_PORT);
         } catch (Exception e) {
             throw new Exception("First create JedisPool error : " + e);

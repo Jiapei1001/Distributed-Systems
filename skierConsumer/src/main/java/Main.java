@@ -1,7 +1,7 @@
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import model.LiftRideDao;
+import model.LiftRideDaoSkier;
 
 public class Main {
 
@@ -16,7 +16,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         // NOTE: JedisFactory.getInstance() factory method is not thread-safe.
         // the pool instance is thread safe
-        LiftRideDao liftRideDao = new LiftRideDao();
+        LiftRideDaoSkier liftRideDao = new LiftRideDaoSkier();
 
         // ConnectionFactory for RabbitMQ
         ConnectionFactory factory = new ConnectionFactory();

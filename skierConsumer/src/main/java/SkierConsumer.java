@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.LiftRideDao;
+import model.LiftRideDaoSkier;
 
 public class SkierConsumer implements Runnable {
 
     private static final String SKIER_QUEUE_NAME = "skier_message_queue";
     private final Channel channel;
-    private final LiftRideDao liftRideDao;
+    private final LiftRideDaoSkier liftRideDao;
 
-    public SkierConsumer(Channel channel, LiftRideDao liftRideDao) {
+    public SkierConsumer(Channel channel, LiftRideDaoSkier liftRideDao) {
         this.channel = channel;
         this.liftRideDao = liftRideDao;
     }

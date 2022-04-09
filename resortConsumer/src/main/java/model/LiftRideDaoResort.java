@@ -1,21 +1,26 @@
 package model;
 
 import com.google.gson.Gson;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class LiftRideDaoResort {
 
-    // private static final String REDIS_HOST = "localhost";   // "127.0.0.1"
-    private static final String REDIS_HOST = "35.170.200.33";
-    private static final int REDIS_PORT = 6379;
+    // private static final String RESORT_REDIS_HOST = "localhost";   // "127.0.0.1"
+    private static final String RESORT_REDIS_HOST = "35.170.200.33";
+    private static final int RESORT_REDIS_PORT = 6379;
 
     private static JedisPoolConfig poolConfig;
     private static JedisPool jedisPool;
     private final Gson gson;
+
+    private static final int MINUTES_PER_HOUR = 60;
 
     public LiftRideDaoResort() throws Exception {
         initialJedisPool();
@@ -57,7 +62,7 @@ public class LiftRideDaoResort {
             // // Increase this value when you see pool.getResource() taking a long time to complete under burst scenarios
             poolConfig.setMinIdle(10240);
 
-            jedisPool = new JedisPool(poolConfig, REDIS_HOST, REDIS_PORT, 10 * 1000);
+            jedisPool = new JedisPool(poolConfig, RESORT_REDIS_HOST, RESORT_REDIS_PORT, 10 * 1000);
             // jedisPool = new JedisPool(REDIS_HOST, REDIS_PORT);
         } catch (Exception e) {
             throw new Exception("First create JedisPool error : " + e);
@@ -71,25 +76,21 @@ public class LiftRideDaoResort {
 
         // Jedis jedis = jedisPool.getResource();
         try (Jedis jedis = jedisPool.getResource()) {
-            // For skier N, how many days have they skied this season?
-            // SkierN_Season, a SET that stores the days. As the elements in the set is unique, we can use the set's size to answer the question above.
-            // String Skier_Season = "Skier_" + r.skierID + "_Season_" + r.seasonID;
-            String Skier_Season = "Skier_" + r.skierID + "_" + r.seasonID;
-            jedis.sadd(Skier_Season, r.dayID);
+            // How many unique skiers visited resort X on day N?
+            // Resort_Season_Day, as a SET
+            String Resort_Season_Day = r.resortID + "_" + r.seasonID + "_" + r.dayID;
+            jedis.sadd(Resort_Season_Day, String.valueOf(r.skierID));
 
-            // For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
-            // Redis HASH, SkierN -> skiDay : vertical.
-            // HINCRBY, HGETALL, HKEYS, HVALS
-            int increment = r.liftID * 10;
-            String Skier = "Skier_" + r.skierID;
-            jedis.hincrBy(Skier, r.seasonID + "_" + r.dayID, increment);
+            // How many rides on lift N happened on day N?
+            // MAP, Rides_Resort_Season_Day, increment by 1
+            String Rides_Resort_Season_Day = "Rides_" + Resort_Season_Day;
+            jedis.incrBy(Rides_Resort_Season_Day, 1);
 
-            // For skier N, show me the lifts they rode on each ski day
-            // Redis SET, append the liftRide to the set of the key
-            // String Skier_Season_Day =
-            //         "Skier_" + r.skierID + "_Season_" + r.seasonID + "_Day_" + r.dayID;
-            String Skier_Season_Day = "Skier_" + r.skierID + "_" + r.seasonID + "_" + r.dayID;
-            jedis.sadd(Skier_Season_Day, r.liftID.toString());
+            // On day N, show me how many lift rides took place in each hour of the ski day
+            // HASH, Hours_Resort_Season_Day -> Hour : increment by 1
+            String Ride_Hours_Resort_Season_Day = "Ride_Hours_" + Resort_Season_Day;
+            String Hour = getHourLot(r.time);
+            jedis.hincrBy(Ride_Hours_Resort_Season_Day, Hour, 1);
         }
 
         // Redis LIST, append to the key, SkierN
@@ -97,41 +98,47 @@ public class LiftRideDaoResort {
         System.out.println(" [" + r.skierID + "] Done");
     }
 
-
-    // Query #1 - For skier N, how many days have they skied this season?
-    public int getSkiDaysThisSeason(String skierID, String seasonID) {
-        long res = -1;
-
-        String Skier_Season = "Skier_" + skierID + "_Season_" + seasonID;
-        try (Jedis jedis = jedisPool.getResource()) {
-            // set length
-            res = jedis.llen(Skier_Season);
-        }
-
-        return (int) res;
+    // Get hour's index lot, total range as 9:00 am to 4:00 pm
+    // "time": 217 -> 217 % 60 -> index lot 4
+    private String getHourLot(Integer time) {
+        return String.valueOf(time % MINUTES_PER_HOUR);
     }
 
-    // Query #2 - For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
-    public int getVerticalTotals(String skierID, String seasonID, String dayID) {
-        Integer res = null;
+    // Query #1 - How many unique skiers visited resort X on day N?
+    public int getUniqueSkiersPerDay(String resortID, String seasonID, String dayID) {
+        int res;
+        String Resort_Season_Day = resortID + "_" + seasonID + "_" + dayID;
 
-        String Skier = "Skier_" + skierID;
-        String Season_Day = seasonID + "_" + dayID;
+        // SET, SCARD key, Returns the set cardinality (number of elements) of the set stored at
         try (Jedis jedis = jedisPool.getResource()) {
-            // hash, key, field
-            res = Integer.parseInt(jedis.hget(Skier, Season_Day));
+            res = (int) jedis.scard(Resort_Season_Day);
         }
         return res;
     }
 
-    // Query #3 - For skier N, show me the lifts they rode on each ski day
-    public Set<String> getLifts(String skierID, String seasonID, String dayID) {
-        Set<String> res = new HashSet<>();
+    // Query #2 - How many rides on lift N happened on day N?
+    public int getNumOfRidesPerDay(String resortID, String seasonID, String dayID) {
+        int res;
+        String Resort_Season_Day = resortID + "_" + seasonID + "_" + dayID;
+        String Rides_Resort_Season_Day = "Rides_" + Resort_Season_Day;
 
-        String Skier_Season_Day = "Skier_" + skierID + "_Season_" + seasonID + "_Day_" + dayID;
+        // MAP
         try (Jedis jedis = jedisPool.getResource()) {
-            // set members
-            res = jedis.smembers(Skier_Season_Day);
+            res = Integer.parseInt(jedis.get(Rides_Resort_Season_Day));
+        }
+        return res;
+    }
+
+    // Query #3 - On day N, show me how many lift rides took place in each hour of the ski day?
+    public Map<String, String> getNumOfRidesPerHour(String resortID, String seasonID, String dayID) {
+        Map<String, String> res;
+        String Resort_Season_Day = resortID + "_" + seasonID + "_" + dayID;
+        String Ride_Hours_Resort_Season_Day = "Ride_Hours_" + Resort_Season_Day;
+
+        // HASH
+        try (Jedis jedis = jedisPool.getResource()) {
+            // hash: key, field, value
+            res = jedis.hgetAll(Ride_Hours_Resort_Season_Day);
         }
 
         return res;
