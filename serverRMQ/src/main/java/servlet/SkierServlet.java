@@ -27,6 +27,8 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 public class SkierServlet extends HttpServlet {
 
     private static final String SKIER_QUEUE_NAME = "skier_message_queue";
+    private static final String RESORT_QUEUE_NAME = "resort_message_queue";
+
     private ObjectPool<Channel> channelPool;
 
     public void init() {
@@ -127,15 +129,16 @@ public class SkierServlet extends HttpServlet {
         // if lift ride is valid, format the incoming data and send it as a message to rabbit message queue
         Channel channel = null;
         try {
+            String json = gson.toJson(ride);
+
             // https://commons.apache.org/proper/commons-pool/guide/index.html
             // The default behavior is for the pool to act as a LIFO queue.
             // When there are idle objects available in the pool, borrowObject returns the most recently returned ("last in") instance.
             channel = this.channelPool.borrowObject();
             // https://www.rabbitmq.com/tutorials/tutorial-two-java.html
-            channel.queueDeclare(SKIER_QUEUE_NAME, true, false, false, null);
-            String json = gson.toJson(ride);
+            channel.queueDeclare(RESORT_QUEUE_NAME, true, false, false, null);
             channel.basicPublish("",
-                    SKIER_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes(
+                    RESORT_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes(
                             StandardCharsets.UTF_8));
 
             response.setStatus(HttpServletResponse.SC_CREATED);
