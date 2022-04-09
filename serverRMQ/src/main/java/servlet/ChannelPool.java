@@ -13,7 +13,7 @@ public class ChannelPool extends BasePooledObjectFactory<Channel> {
 
     // private static final String HOST = "127.0.0.1";
     // private static final String HOST = "http://localhost";
-    private static final String HOST = "52.90.200.215";
+    private static final String HOST = "3.86.161.121";
     private static final int PORT = 5672;
     private final ConnectionFactory connFactory = new ConnectionFactory();
 

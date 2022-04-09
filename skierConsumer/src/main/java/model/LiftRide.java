@@ -1,6 +1,7 @@
 package model;
 
 public class LiftRide {
+
     public Integer resortID;
     public String seasonID;
     public String dayID;

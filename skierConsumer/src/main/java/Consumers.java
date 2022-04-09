@@ -2,17 +2,16 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import model.LiftRideDao;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 public class Consumers {
+
     // private static final String MQ_HOST = "localhost";  // "127.0.0.1"
-    private static final String MQ_HOST = "52.90.200.215";
+    private static final String MQ_HOST = "3.86.161.121";
     private static final int MQ_PORT = 5672;
     private static final String MQ_USER = "admin123456";
     private static final String MQ_PASSWORD = "123456";
 
-    private static final int NUM_THREADS = 256;
+    private static final int NUM_THREADS = 512;
 
     public static void main(String[] args) throws Exception {
         // NOTE: JedisFactory.getInstance() factory method is not thread-safe.

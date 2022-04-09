@@ -1,14 +1,16 @@
 package model;
 
 import com.google.gson.Gson;
+import java.util.HashSet;
+import java.util.Set;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.exceptions.JedisException;
 
 public class LiftRideDao {
+
     // private static final String REDIS_HOST = "localhost";   // "127.0.0.1"
-    private static final String REDIS_HOST = "52.87.191.4";
+    private static final String REDIS_HOST = "35.170.200.33";
     private static final int REDIS_PORT = 6379;
 
     private static JedisPoolConfig poolConfig;
@@ -18,10 +20,6 @@ public class LiftRideDao {
     public LiftRideDao() throws Exception {
         initialJedisPool();
         this.gson = new Gson();
-    }
-
-    public JedisPool getJedisPool() {
-        return jedisPool;
     }
 
     // How to avoid failure when connecting to Redis instance?
@@ -42,15 +40,14 @@ public class LiftRideDao {
 
             // Each thread trying to access Redis needs its own Jedis instance from the pool.
             // Using too small a value here can lead to performance problems, too big and you have wasted resources.
-            int maxConnections = 512;
-            poolConfig.setMaxTotal(maxConnections);
+            poolConfig.setMaxTotal(20480);
 
-            int maxIdle = 256;
-            poolConfig.setMaxIdle(maxIdle);
+            // int maxIdle = 1024;
+            // poolConfig.setMaxIdle(maxIdle);
 
             // Using "false" here will make it easier to debug when your maxTotal/minIdle/etc settings need adjusting.
             // Setting it to "true" will result better behavior when unexpected load hits in production
-            poolConfig.setBlockWhenExhausted(true);
+            // poolConfig.setBlockWhenExhausted(true);
 
             // How long to wait before throwing when pool is exhausted
             // long operationTimeout = 10 * 1000;
@@ -58,7 +55,7 @@ public class LiftRideDao {
 
             // // This controls the number of connections that should be maintained for bursts of load.
             // // Increase this value when you see pool.getResource() taking a long time to complete under burst scenarios
-            // poolConfig.setMinIdle(256);
+            poolConfig.setMinIdle(10240);
 
             jedisPool = new JedisPool(poolConfig, REDIS_HOST, REDIS_PORT, 10 * 1000);
             // jedisPool = new JedisPool(REDIS_HOST, REDIS_PORT);
@@ -72,11 +69,12 @@ public class LiftRideDao {
         // JsonObject json = this.gson.fromJson(message, JsonObject.class);
         LiftRide r = this.gson.fromJson(message, LiftRide.class);
 
-        Jedis jedis = jedisPool.getResource();
-        try {
+        // Jedis jedis = jedisPool.getResource();
+        try (Jedis jedis = jedisPool.getResource()) {
             // For skier N, how many days have they skied this season?
             // SkierN_Season, a SET that stores the days. As the elements in the set is unique, we can use the set's size to answer the question above.
-            String Skier_Season = "Skier_" + r.skierID + "_Season_" + r.seasonID;
+            // String Skier_Season = "Skier_" + r.skierID + "_Season_" + r.seasonID;
+            String Skier_Season = "Skier_" + r.skierID + "_" + r.seasonID;
             jedis.sadd(Skier_Season, r.dayID);
 
             // For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
@@ -88,21 +86,54 @@ public class LiftRideDao {
 
             // For skier N, show me the lifts they rode on each ski day
             // Redis SET, append the liftRide to the set of the key
-            String Skier_Season_Day =
-                    "Skier_" + r.skierID + "_Season_" + r.seasonID + "_Day_" + r.dayID;
+            // String Skier_Season_Day =
+            //         "Skier_" + r.skierID + "_Season_" + r.seasonID + "_Day_" + r.dayID;
+            String Skier_Season_Day = "Skier_" + r.skierID + "_" + r.seasonID + "_" + r.dayID;
             jedis.sadd(Skier_Season_Day, r.liftID.toString());
-
-        } catch (JedisException e) {
-            if (jedis != null) {
-                jedisPool.returnBrokenResource(jedis);
-                jedis = null;
-            }
-        } finally {
-            jedisPool.returnResource(jedis);
         }
 
         // Redis LIST, append to the key, SkierN
         System.out.println(r);
         System.out.println(" [" + r.skierID + "] Done");
+    }
+
+
+    // Query #1 - For skier N, how many days have they skied this season?
+    public int getSkiDaysThisSeason(String skierID, String seasonID) {
+        long res = -1;
+
+        String Skier_Season = "Skier_" + skierID + "_Season_" + seasonID;
+        try (Jedis jedis = jedisPool.getResource()) {
+            // set length
+            res = jedis.llen(Skier_Season);
+        }
+
+        return (int) res;
+    }
+
+    // Query #2 - For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
+    public int getVerticalTotals(String skierID, String seasonID, String dayID) {
+        Integer res = null;
+
+        String Skier = "Skier_" + skierID;
+        String Season_Day = seasonID + "_" + dayID;
+        try (Jedis jedis = jedisPool.getResource()) {
+            // hash, key, field
+            res = Integer.parseInt(jedis.hget(Skier, Season_Day));
+        }
+        return res;
+    }
+
+    // Query #3 - For skier N, show me the lifts they rode on each ski day
+    public Set<String> getLifts(String skierID, String seasonID, String dayID) {
+        Set<String> res = new HashSet<>();
+
+        String Skier_Season_Day = "Skier_" + skierID + "_Season_" + seasonID + "_Day_" + dayID;
+        try (Jedis jedis = jedisPool.getResource()) {
+            // set members
+            res = jedis.smembers(Skier_Season_Day);
+        }
+
+        return res;
     }
 }

@@ -137,6 +137,8 @@ public class SkierServlet extends HttpServlet {
             channel.basicPublish("",
                     SKIER_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes(
                             StandardCharsets.UTF_8));
+
+            response.setStatus(HttpServletResponse.SC_CREATED);
         } catch (Exception e) {
             // Channels and error handling - https://www.rabbitmq.com/channels.html
             // TODO: confirm if throw exception is needed, or print stack trace is ok. If so, would it block sending messages?

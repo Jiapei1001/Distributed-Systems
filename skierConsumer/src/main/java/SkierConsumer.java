@@ -1,15 +1,10 @@
-import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import model.LiftRide;
 import model.LiftRideDao;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.exceptions.JedisException;
 
 public class SkierConsumer implements Runnable {
 
