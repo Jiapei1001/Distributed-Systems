@@ -1,6 +1,7 @@
 package model;
 
 public class SkierVertical {
+
     Integer resortID;
     String seasonID;
     String dayID;

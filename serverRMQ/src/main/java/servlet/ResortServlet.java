@@ -2,18 +2,20 @@ package servlet;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.*;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
-import java.io.IOException;
-import model.ResortsList;
-import model.ResponseMsg;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import model.Resort;
 import model.ResortSkiers;
+import model.ResortsList;
+import model.ResponseMsg;
 import model.SeasonsList;
 
 @WebServlet(name = "ResortServlet", value = "/ResortServlet")
@@ -41,7 +43,8 @@ public class ResortServlet extends HttpServlet {
         String[] urlPath = url.split("/");
         if (!isUrlValid(urlPath)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs"), ResponseMsg.class));
+            response.getWriter()
+                    .write(gson.toJson(new ResponseMsg("Invalid inputs"), ResponseMsg.class));
             return;
         }
 
@@ -62,7 +65,8 @@ public class ResortServlet extends HttpServlet {
         else if (urlPath.length == 7) {
             // TODO: process to get the number of skiers at resort/season/day
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write(gson.toJson(new ResortSkiers("Mission Ridge", 78999), ResortSkiers.class));
+            response.getWriter().write(gson.toJson(new ResortSkiers("Mission Ridge", 78999),
+                    ResortSkiers.class));
         }
     }
 
@@ -76,21 +80,24 @@ public class ResortServlet extends HttpServlet {
         String url = request.getPathInfo();
         if (url == null || url.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs"), ResponseMsg.class));
+            response.getWriter()
+                    .write(gson.toJson(new ResponseMsg("Invalid inputs"), ResponseMsg.class));
             return;
         }
 
         String[] urlPath = url.split("/");
         if (!isUrlValid(urlPath)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs"), ResponseMsg.class));
+            response.getWriter()
+                    .write(gson.toJson(new ResponseMsg("Invalid inputs"), ResponseMsg.class));
             return;
         }
 
         // valid
         // urlParts = [, 1, seasons]
         // get request body
-        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Type type = new TypeToken<Map<String, String>>() {
+        }.getType();
         Map<String, String> reqBody = gson.fromJson(request.getReader(), type);
 
         String season = reqBody.get("year");

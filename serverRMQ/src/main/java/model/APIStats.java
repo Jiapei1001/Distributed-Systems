@@ -1,6 +1,7 @@
 package model;
 
 public class APIStats {
+
     private String URL;
     private String operation;
     private Integer mean;

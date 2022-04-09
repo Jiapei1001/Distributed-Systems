@@ -1,6 +1,7 @@
 package model;
 
 public class LiftRidePayload {
+
     Integer time;
     Integer liftID;
     Integer waitTime;

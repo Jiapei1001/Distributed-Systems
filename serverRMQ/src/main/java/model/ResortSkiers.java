@@ -1,6 +1,7 @@
 package model;
 
 public class ResortSkiers {
+
     private String resortName;
     private Integer numSkiers;
 

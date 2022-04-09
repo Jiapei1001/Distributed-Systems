@@ -2,13 +2,13 @@ package model;
 
 public class LiftRide {
 
-    Integer resortID;
-    String seasonID;
-    String dayID;
-    Integer skierID;
-    Integer time;
-    Integer liftID;
-    Integer waitTime;
+    public Integer resortID;
+    public String seasonID;
+    public String dayID;
+    public Integer skierID;
+    public Integer time;
+    public Integer liftID;
+    public Integer waitTime;
 
     public LiftRide(Integer resortID, String seasonID, String dayID, Integer skierID,
             Integer time, Integer liftID, Integer waitTime) {
@@ -79,7 +79,7 @@ public class LiftRide {
 
     @Override
     public String toString() {
-        return "LiftRide{" +
+        return "model.LiftRide{" +
                 "resortID=" + resortID +
                 ", seasonID='" + seasonID + '\'' +
                 ", dayID='" + dayID + '\'' +

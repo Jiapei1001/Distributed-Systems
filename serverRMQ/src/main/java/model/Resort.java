@@ -4,9 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Resort {
+
     private Integer resortID;
     private String resortName;
-    private Set<String> seasons;
+    private final Set<String> seasons;
 
     public Resort(Integer resortID, String resortName) {
         this.resortID = resortID;
