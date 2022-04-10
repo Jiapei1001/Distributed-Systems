@@ -3,6 +3,7 @@ package model;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -87,7 +88,7 @@ public class LiftRideDaoResort {
             String Rides_Resort_Season_Day = "R_" + Resort_Season_Day;
             jedis.incr(Rides_Resort_Season_Day);
 
-            // On day N, show me how many lift rides took place in each hour of the ski day
+            // On day N, show me how many lift rides took place in each hour of the ski day?
             // HASH, Hours_Resort_Season_Day -> Hour : increment by 1
             String Ride_Hours_Resort_Season_Day = "H_" + Resort_Season_Day;
             // too much time
@@ -108,8 +109,8 @@ public class LiftRideDaoResort {
 
     // Get hour's index lot, total range as 9:00 am to 4:00 pm
     // "time": 217 -> 217 % 60 -> index lot 4
-    private String getHourLot(Integer time) {
-        return String.valueOf(time % MINUTES_PER_HOUR);
+    private Integer getHourLot(Integer time) {
+        return (time % MINUTES_PER_HOUR);
     }
 
     // Query #1 - How many unique skiers visited resort X on day N?
@@ -128,7 +129,7 @@ public class LiftRideDaoResort {
     public int getNumOfRidesPerDay(String resortID, String seasonID, String dayID) {
         int res;
         String Resort_Season_Day = resortID + "_" + seasonID + "_" + dayID;
-        String Rides_Resort_Season_Day = "Rides_" + Resort_Season_Day;
+        String Rides_Resort_Season_Day = "R_" + Resort_Season_Day;
 
         // MAP
         try (Jedis jedis = jedisPool.getResource()) {
@@ -138,15 +139,31 @@ public class LiftRideDaoResort {
     }
 
     // Query #3 - On day N, show me how many lift rides took place in each hour of the ski day?
-    public Map<String, String> getNumOfRidesPerHour(String resortID, String seasonID, String dayID) {
-        Map<String, String> res;
-        String Resort_Season_Day = resortID + "_" + seasonID + "_" + dayID;
-        String Ride_Hours_Resort_Season_Day = "Ride_Hours_" + Resort_Season_Day;
+    public Map<Integer, Integer> getNumOfRidesPerHour(String resortID, String seasonID, String dayID) {
+        // Map<String, String> res;
+        // String Resort_Season_Day = resortID + "_" + seasonID + "_" + dayID;
+        // String Ride_Hours_Resort_Season_Day = "R_H_" + Resort_Season_Day;
+        //
+        // // HASH
+        // try (Jedis jedis = jedisPool.getResource()) {
+        //     // hash: key, field, value
+        //     res = jedis.hgetAll(Ride_Hours_Resort_Season_Day);
+        // }
 
-        // HASH
+        Map<Integer, Integer> res = new HashMap<>();
+
+        List<String> timeSpots;
+        String Resort_Season_Day = resortID + "_" + seasonID + "_" + dayID;
+        String Ride_Hours_Resort_Season_Day = "H_" + Resort_Season_Day;
+
         try (Jedis jedis = jedisPool.getResource()) {
-            // hash: key, field, value
-            res = jedis.hgetAll(Ride_Hours_Resort_Season_Day);
+            // get all results from list
+            timeSpots = jedis.lrange(Ride_Hours_Resort_Season_Day, 0, -1);
+        }
+
+        for (String t : timeSpots) {
+            int hourLot = getHourLot(Integer.parseInt(t));
+            res.put(hourLot, res.getOrDefault(hourLot, 0) + 1);
         }
 
         return res;
