@@ -13,7 +13,7 @@ import redis.clients.jedis.JedisPoolConfig;
 public class LiftRideDaoResort {
 
     // private static final String RESORT_REDIS_HOST = "localhost";   // "127.0.0.1"
-    private static final String RESORT_REDIS_HOST = "35.170.200.33";
+    private static final String RESORT_REDIS_HOST = "18.209.62.2";
     private static final int RESORT_REDIS_PORT = 6379;
 
     private static JedisPoolConfig poolConfig;
@@ -60,7 +60,7 @@ public class LiftRideDaoResort {
 
             // // This controls the number of connections that should be maintained for bursts of load.
             // // Increase this value when you see pool.getResource() taking a long time to complete under burst scenarios
-            poolConfig.setMinIdle(10240);
+            poolConfig.setMinIdle(10000);
 
             jedisPool = new JedisPool(poolConfig, RESORT_REDIS_HOST, RESORT_REDIS_PORT, 10 * 1000);
             // jedisPool = new JedisPool(REDIS_HOST, REDIS_PORT);
@@ -79,18 +79,26 @@ public class LiftRideDaoResort {
             // How many unique skiers visited resort X on day N?
             // Resort_Season_Day, as a SET
             String Resort_Season_Day = r.resortID + "_" + r.seasonID + "_" + r.dayID;
-            jedis.sadd(Resort_Season_Day, String.valueOf(r.skierID));
+            String skier = String.valueOf(r.skierID);
+            jedis.sadd(Resort_Season_Day, skier);
 
             // How many rides on lift N happened on day N?
             // MAP, Rides_Resort_Season_Day, increment by 1
-            String Rides_Resort_Season_Day = "Rides_" + Resort_Season_Day;
-            jedis.incrBy(Rides_Resort_Season_Day, 1);
+            String Rides_Resort_Season_Day = "R_" + Resort_Season_Day;
+            jedis.incr(Rides_Resort_Season_Day);
 
             // On day N, show me how many lift rides took place in each hour of the ski day
             // HASH, Hours_Resort_Season_Day -> Hour : increment by 1
-            String Ride_Hours_Resort_Season_Day = "Ride_Hours_" + Resort_Season_Day;
-            String Hour = getHourLot(r.time);
-            jedis.hincrBy(Ride_Hours_Resort_Season_Day, Hour, 1);
+            String Ride_Hours_Resort_Season_Day = "H_" + Resort_Season_Day;
+            // too much time
+            // String Hour = getHourLot(r.time);
+            // jedis.hincrBy(Ride_Hours_Resort_Season_Day, Hour, 1);
+            String time = String.valueOf(r.time);
+            jedis.rpush(Ride_Hours_Resort_Season_Day, time);
+
+            // String key = String.valueOf(r.resortID);
+            // String data = r.resortID + "_" + r.seasonID + "_" + r.dayID + "_" + r.time;
+            // jedis.rpush(key, data);
         }
 
         // Redis LIST, append to the key, SkierN

@@ -8,6 +8,8 @@ import model.LiftRideDaoSkier;
 
 public class SkierConsumer implements Runnable {
 
+    // bind a queue to an exchange
+    private static final String EXCHANGE_NAME = "lift_ride";
     private static final String SKIER_QUEUE_NAME = "skier_message_queue";
     private final Channel channel;
     private final LiftRideDaoSkier liftRideDao;
@@ -25,6 +27,10 @@ public class SkierConsumer implements Runnable {
 
         try {
             channel.queueDeclare(SKIER_QUEUE_NAME, true, false, false, null);
+
+            // // Exchange & Bind
+            // channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+            // channel.queueBind(SKIER_QUEUE_NAME, EXCHANGE_NAME, "");
             System.out.println(" [*] Waiting for skier messages for skier db. To exit press CTRL+C");
 
             // basic.qos method to make it possible to limit the number of unacknowledged messages on a channel (or connection) when consuming (aka "prefetch count").

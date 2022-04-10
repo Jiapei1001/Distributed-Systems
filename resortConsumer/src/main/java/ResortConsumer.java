@@ -7,7 +7,9 @@ import java.util.logging.Logger;
 import model.LiftRideDaoResort;
 
 public class ResortConsumer implements Runnable {
-    private static final String SKIER_QUEUE_NAME = "skier_message_queue";
+    // Exchange
+    private static final String EXCHANGE_NAME = "lift_ride";
+    private static final String RESORT_QUEUE_NAME = "resort_message_queue";
     private final Channel channel;
     private final LiftRideDaoResort daoResort;
 
@@ -19,7 +21,11 @@ public class ResortConsumer implements Runnable {
     @Override
     public void run() {
         try {
-            channel.queueDeclare(SKIER_QUEUE_NAME, true, false, false, null);
+            channel.queueDeclare(RESORT_QUEUE_NAME, true, false, false, null);
+
+            // Exchange
+            // channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+            // channel.queueBind(RESORT_QUEUE_NAME, EXCHANGE_NAME, "");
             System.out.println(" [*] Waiting for skier messages for resort db. To exit press CTRL+C");
 
             // basic.qos method to make it possible to limit the number of unacknowledged messages on a channel (or connection) when consuming (aka "prefetch count").
@@ -33,7 +39,7 @@ public class ResortConsumer implements Runnable {
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             };
 
-            channel.basicConsume(SKIER_QUEUE_NAME, autoAck, deliverCallback, consumerTag -> {});
+            channel.basicConsume(RESORT_QUEUE_NAME, autoAck, deliverCallback, consumerTag -> {});
         } catch (IOException e) {
             Logger.getLogger(ResortConsumer.class.getName()).log(Level.INFO, e.getMessage());
         }
