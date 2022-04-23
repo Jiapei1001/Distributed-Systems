@@ -11,9 +11,9 @@ import org.apache.commons.pool2.impl.DefaultPooledObject;
 // https://commons.apache.org/proper/commons-pool/examples.html
 public class ChannelPool extends BasePooledObjectFactory<Channel> {
 
-    // private static final String HOST = "127.0.0.1";
+    private static final String HOST = "127.0.0.1";
     // private static final String HOST = "http://localhost";
-    private static final String HOST = "44.201.192.31";
+    // private static final String HOST = "18.209.238.97";
     private static final int PORT = 5672;
     private final ConnectionFactory connFactory = new ConnectionFactory();
 
@@ -24,8 +24,8 @@ public class ChannelPool extends BasePooledObjectFactory<Channel> {
 
         this.connFactory.setHost(HOST);
         this.connFactory.setPort(PORT);
-        this.connFactory.setUsername("admin123456");
-        this.connFactory.setPassword("123456");
+        // this.connFactory.setUsername("admin123456");
+        // this.connFactory.setPassword("123456");
 
         Connection conn = this.connFactory.newConnection();
         return conn.createChannel();

@@ -5,8 +5,8 @@ import model.LiftRideDaoSkier;
 
 public class Main {
 
-    // private static final String MQ_HOST = "localhost";  // "127.0.0.1"
-    private static final String MQ_HOST = "44.201.192.31";
+    private static final String MQ_HOST = "127.0.0.1";  // "127.0.0.1"
+    // private static final String MQ_HOST = "44.201.192.31";
     private static final int MQ_PORT = 5672;
     private static final String MQ_USER = "admin123456";
     private static final String MQ_PASSWORD = "123456";

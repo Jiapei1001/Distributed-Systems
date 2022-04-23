@@ -1,7 +1,9 @@
 package model;
 
 import com.google.gson.Gson;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -13,7 +15,7 @@ public class LiftRideDaoSkier {
     // redis.clients.jedis.exceptions.JedisDataException: DENIED Redis is running in protected mode because protected mode is enabled, no bind address was specified, no authentication password is requested to clients. In this mode connections are only accepted from the loopback interface. If you want to connect from external computers to Redis you may adopt one of the following solutions: 1) Just disable protected mode sending the command 'CONFIG SET protected-mode no' from the loopback interface by connecting to Redis from the same host the server is running, however MAKE SURE Redis is not publicly accessible from internet if you do so. Use CONFIG REWRITE to make this change permanent. 2) Alternatively you can just disable the protected mode by editing the Redis configuration file, and setting the protected mode option to 'no', and then restarting the server. 3) If you started the server manually just for testing, restart it with the '--protected-mode no' option. 4) Setup a bind address or an authentication password. NOTE: You only need to do one of the above things in order for the server to start accepting connections from the outside.
 
     // private static final String SKIER_REDIS_HOST = "localhost";   // "127.0.0.1"
-    private static final String SKIER_REDIS_HOST = "54.87.193.140";
+    private static final String SKIER_REDIS_HOST = "3.92.77.251";
     private static final int SKIER_REDIS_PORT = 6379;
 
     private static JedisPoolConfig poolConfig;
@@ -43,7 +45,7 @@ public class LiftRideDaoSkier {
 
             // Each thread trying to access Redis needs its own Jedis instance from the pool.
             // Using too small a value here can lead to performance problems, too big and you have wasted resources.
-            poolConfig.setMaxTotal(20480);
+            poolConfig.setMaxTotal(2048);
 
             // int maxIdle = 1024;
             // poolConfig.setMaxIdle(maxIdle);
@@ -58,9 +60,9 @@ public class LiftRideDaoSkier {
 
             // // This controls the number of connections that should be maintained for bursts of load.
             // // Increase this value when you see pool.getResource() taking a long time to complete under burst scenarios
-            poolConfig.setMinIdle(10240);
+            poolConfig.setMinIdle(1024);
 
-            jedisPool = new JedisPool(poolConfig, SKIER_REDIS_HOST, SKIER_REDIS_PORT, 10 * 1000);
+            jedisPool = new JedisPool(poolConfig, SKIER_REDIS_HOST, SKIER_REDIS_PORT, 10 * 1000, "default", "admin123456");
             // jedisPool = new JedisPool(REDIS_HOST, REDIS_PORT);
         } catch (Exception e) {
             throw new Exception("First create JedisPool error : " + e);
@@ -77,21 +79,21 @@ public class LiftRideDaoSkier {
             // For skier N, how many days have they skied this season?
             // SkierN_Season, a SET that stores the days. As the elements in the set is unique, we can use the set's size to answer the question above.
             // String Skier_Season = "Skier_" + r.skierID + "_Season_" + r.seasonID;
-            String Skier_Season = "Skier_" + r.skierID + "_" + r.seasonID;
+            String Skier_Season = "Skier_" + r.skierID + "_Season_" + r.seasonID;
             jedis.sadd(Skier_Season, r.dayID);
 
             // For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
             // Redis HASH, SkierN -> skiDay : vertical.
             // HINCRBY, HGETALL, HKEYS, HVALS
             int increment = r.liftID * 10;
-            String Skier = "Skier_" + r.skierID;
-            jedis.hincrBy(Skier, r.seasonID + "_" + r.dayID, increment);
+            String Skier_Resort = "Skier_" + r.skierID + "_Resort_" + r.resortID;
+            jedis.hincrBy(Skier_Resort, r.seasonID + "_" + r.dayID, increment);
 
             // For skier N, show me the lifts they rode on each ski day
             // Redis SET, append the liftRide to the set of the key
             // String Skier_Season_Day =
             //         "Skier_" + r.skierID + "_Season_" + r.seasonID + "_Day_" + r.dayID;
-            String Skier_Season_Day = "Skier_" + r.skierID + "_" + r.seasonID + "_" + r.dayID;
+            String Skier_Season_Day = "Skier_" + r.skierID + "_Season_" + r.seasonID + "_Day_" + r.dayID;
             jedis.sadd(Skier_Season_Day, r.liftID.toString());
         }
 
@@ -104,7 +106,7 @@ public class LiftRideDaoSkier {
     public int getSkiDaysThisSeason(String skierID, String seasonID) {
         long res = -1;
 
-        String Skier_Season = "Skier_" + skierID + "_" + seasonID;
+        String Skier_Season = "Skier_" + skierID + "_Season_" + seasonID;
         try (Jedis jedis = jedisPool.getResource()) {
             // set length
             res = jedis.llen(Skier_Season);
@@ -114,23 +116,41 @@ public class LiftRideDaoSkier {
     }
 
     // Query #2 - For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
-    public int getVerticalTotals(String skierID, String seasonID, String dayID) {
+    public int getVerticalTotalsPerDay(String skierID, Integer resortID, String seasonID, String dayID) {
         Integer res = null;
 
-        String Skier = "Skier_" + skierID;
+        String Skier_Resort = "Skier_" + skierID + "_Resort_" + resortID;
         String Season_Day = seasonID + "_" + dayID;
         try (Jedis jedis = jedisPool.getResource()) {
             // hash, key, field
-            res = Integer.parseInt(jedis.hget(Skier, Season_Day));
+            res = Integer.parseInt(jedis.hget(Skier_Resort, Season_Day));
         }
         return res;
+    }
+
+    // For skier N, get the total vertical for the skier the specified resort.
+    public Map<String, Integer> getVerticalTotalsPerResort(String skierID, Integer resortID) {
+        Map<String, Integer> res = new HashMap<>();
+
+        Map<String, String> seasonVerticals;
+        String Skier_Resort = "Skier_" + skierID + "_Resort_" + resortID;
+        try (Jedis jedis = jedisPool.getResource()) {
+            // hash, key, field
+            seasonVerticals = jedis.hgetAll(Skier_Resort);
+        }
+
+        for (Map.Entry<String, String> e : seasonVerticals.entrySet()) {
+            res.put(e.getKey(), res.getOrDefault(e.getKey(), 0) + Integer.parseInt(e.getValue()));
+        }
+
+        return res.isEmpty() ? null : res;
     }
 
     // Query #3 - For skier N, show me the lifts they rode on each ski day
     public Set<String> getLifts(String skierID, String seasonID, String dayID) {
         Set<String> res = new HashSet<>();
 
-        String Skier_Season_Day = "Skier_" + skierID + "_" + seasonID + "_" + dayID;
+        String Skier_Season_Day = "Skier_" + skierID + "_Season_" + seasonID + "_Day_" + dayID;
         try (Jedis jedis = jedisPool.getResource()) {
             // set members
             res = jedis.smembers(Skier_Season_Day);

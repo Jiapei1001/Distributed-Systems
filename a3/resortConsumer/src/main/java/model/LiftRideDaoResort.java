@@ -13,8 +13,8 @@ import redis.clients.jedis.JedisPoolConfig;
 
 public class LiftRideDaoResort {
 
-    // private static final String RESORT_REDIS_HOST = "localhost";   // "127.0.0.1"
-    private static final String RESORT_REDIS_HOST = "18.209.62.2";
+    private static final String RESORT_REDIS_HOST = "18.207.124.244";   // "127.0.0.1"
+    // private static final String RESORT_REDIS_HOST = "18.209.62.2";
     private static final int RESORT_REDIS_PORT = 6379;
 
     private static JedisPoolConfig poolConfig;
@@ -46,7 +46,7 @@ public class LiftRideDaoResort {
 
             // Each thread trying to access Redis needs its own Jedis instance from the pool.
             // Using too small a value here can lead to performance problems, too big and you have wasted resources.
-            poolConfig.setMaxTotal(20480);
+            poolConfig.setMaxTotal(2048);
 
             // int maxIdle = 1024;
             // poolConfig.setMaxIdle(maxIdle);
@@ -61,9 +61,9 @@ public class LiftRideDaoResort {
 
             // // This controls the number of connections that should be maintained for bursts of load.
             // // Increase this value when you see pool.getResource() taking a long time to complete under burst scenarios
-            poolConfig.setMinIdle(10000);
+            poolConfig.setMinIdle(1024);
 
-            jedisPool = new JedisPool(poolConfig, RESORT_REDIS_HOST, RESORT_REDIS_PORT, 10 * 1000);
+            jedisPool = new JedisPool(poolConfig, RESORT_REDIS_HOST, RESORT_REDIS_PORT, 10 * 1000, "default", "admin123456");
             // jedisPool = new JedisPool(REDIS_HOST, REDIS_PORT);
         } catch (Exception e) {
             throw new Exception("First create JedisPool error : " + e);
