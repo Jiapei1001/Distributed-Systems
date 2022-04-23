@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
+import dao.SkierDao;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -32,8 +33,9 @@ public class SkierServlet extends HttpServlet {
     private static final String EXCHANGE_NAME = "lift_ride";
 
     private ObjectPool<Channel> channelPool;
+    private SkierDao skierDao;
 
-    public void init() {
+    public void init() throws ServletException{
         this.channelPool = new GenericObjectPool<>(new ChannelPool());
     }
 
