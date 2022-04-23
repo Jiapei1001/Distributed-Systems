@@ -93,9 +93,20 @@ public class SkierServlet extends HttpServlet {
             }
         } else {
             // urlParts = [, 1, seasons, 2019, day, 1, skier, 123]
-            // TODO: get the total vertical for the skier for the specified ski day
-            response.getWriter().write("34507");
-            response.setStatus(HttpServletResponse.SC_OK);
+            String resortID = urlPath[1];
+            String seasonID = urlPath[3];
+            String dayID = urlPath[5];
+            String skierID = urlPath[7];
+
+            Integer verticalTotal = skierDao.getVerticalTotalPerDay(skierID, resortID, seasonID, dayID);
+
+            if (verticalTotal == null) {
+                response.getWriter().write(gson.toJson(new ResponseMsg("Data not found.")));
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            } else {
+                response.getWriter().write(String.valueOf(verticalTotal));
+                response.setStatus(HttpServletResponse.SC_OK);
+            }
         }
     }
 

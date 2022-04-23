@@ -29,7 +29,7 @@ public class SkierDao {
     }
 
     // Query #2 - For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
-    public int getVerticalTotalsPerDay(String skierID, Integer resortID, String seasonID,
+    public Integer getVerticalTotalPerDay(String skierID, String resortID, String seasonID,
             String dayID) {
         Integer res = null;
 
