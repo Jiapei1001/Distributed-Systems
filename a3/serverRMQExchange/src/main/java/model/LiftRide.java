@@ -2,7 +2,7 @@ package model;
 
 public class LiftRide {
 
-    Integer resortID;
+    String resortID;
     String seasonID;
     String dayID;
     Integer skierID;
@@ -10,7 +10,7 @@ public class LiftRide {
     Integer liftID;
     Integer waitTime;
 
-    public LiftRide(Integer resortID, String seasonID, String dayID, Integer skierID,
+    public LiftRide(String resortID, String seasonID, String dayID, Integer skierID,
             Integer time, Integer liftID, Integer waitTime) {
         this.resortID = resortID;
         this.seasonID = seasonID;
@@ -21,11 +21,11 @@ public class LiftRide {
         this.waitTime = waitTime;
     }
 
-    public Integer getResortID() {
+    public String getResortID() {
         return resortID;
     }
 
-    public void setResortID(Integer resortID) {
+    public void setResortID(String resortID) {
         this.resortID = resortID;
     }
 

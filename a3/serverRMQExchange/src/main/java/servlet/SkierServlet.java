@@ -8,9 +8,6 @@ import dao.SkierDao;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.LiftRide;
 import model.ResponseMsg;
-import model.SkierVertical;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
@@ -33,9 +29,8 @@ public class SkierServlet extends HttpServlet {
     private static final String EXCHANGE_NAME = "lift_ride";
 
     private ObjectPool<Channel> channelPool;
-    private SkierDao skierDao;
 
-    public void init() throws ServletException{
+    public void init() throws ServletException {
         this.channelPool = new GenericObjectPool<>(new ChannelPool());
     }
 
@@ -54,24 +49,48 @@ public class SkierServlet extends HttpServlet {
         }
 
         String[] urlPath = url.split("/");
-        if (!isUrlValid(urlPath)) {
+        if (!isUrlValid(request, urlPath)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs")));
             return;
         }
 
         // valid
+        SkierDao skierDao;
+        try {
+            skierDao = new SkierDao();
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+
         if (urlPath[2].equals("vertical")) {
-            // TODO: business logic to calculate total vertical for the skier for specified seasons at the specified resort
-            SkierVertical skier1 = new SkierVertical(1, "2022-Winter", "23", 102, 202);
-            SkierVertical skier2 = new SkierVertical(1, "2021-Winter", "86", 102, 306);
+            // get the total vertical for the skier for specified seasons at the specified resort
+            String skierID = urlPath[1];
+            String resortID = request.getParameter("resort");
+            // seasonID is optional parameter. Returns the value of a request parameter as a String, or null if the parameter does not exist.
+            String seasonID = request.getParameter("season");
 
-            Map<String, List<SkierVertical>> verticals = new HashMap<>();
-            verticals.computeIfAbsent("resorts", a -> new ArrayList<SkierVertical>()).add(skier1);
-            verticals.computeIfAbsent("resorts", a -> new ArrayList<SkierVertical>()).add(skier2);
-
-            response.getWriter().write(gson.toJson(verticals));
-            response.setStatus(HttpServletResponse.SC_OK);
+            if (seasonID == null) {
+                Map<String, Integer> seasonVerticals = skierDao.getVerticalTotalsPerResort(skierID,
+                        resortID);
+                if (seasonVerticals == null) {
+                    response.getWriter().write(gson.toJson(new ResponseMsg("Data not found.")));
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                } else {
+                    response.getWriter().write(gson.toJson(seasonVerticals));
+                    response.setStatus(HttpServletResponse.SC_OK);
+                }
+            } else {
+                Map<String, Integer> seasonVertical = skierDao.getVerticalTotalPerResortAndSeason(
+                        skierID, resortID, seasonID);
+                if (seasonVertical == null) {
+                    response.getWriter().write(gson.toJson(new ResponseMsg("Data not found.")));
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                } else {
+                    response.getWriter().write(gson.toJson(seasonVertical));
+                    response.setStatus(HttpServletResponse.SC_OK);
+                }
+            }
         } else {
             // urlParts = [, 1, seasons, 2019, day, 1, skier, 123]
             // TODO: get the total vertical for the skier for the specified ski day
@@ -95,7 +114,7 @@ public class SkierServlet extends HttpServlet {
         }
 
         String[] urlPath = url.split("/");
-        if (!isUrlValid(urlPath) || !urlPath[2].equals("seasons")) {
+        if (!isUrlValid(request, urlPath) || !urlPath[2].equals("seasons")) {
             response.getWriter().write(gson.toJson(new ResponseMsg("Invalid inputs")));
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -109,7 +128,7 @@ public class SkierServlet extends HttpServlet {
         Map<String, String> reqBody = gson.fromJson(request.getReader(), type);
 
         LiftRide ride = new LiftRide(
-                Integer.parseInt(urlPath[1]),
+                urlPath[1],
                 urlPath[3],
                 urlPath[5],
                 Integer.parseInt(urlPath[7]),
@@ -148,7 +167,8 @@ public class SkierServlet extends HttpServlet {
 
             // Exchange Fanout
             // channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
-            channel.basicPublish(EXCHANGE_NAME, "", MessageProperties.PERSISTENT_TEXT_PLAIN, json.getBytes(StandardCharsets.UTF_8));
+            channel.basicPublish(EXCHANGE_NAME, "", MessageProperties.PERSISTENT_TEXT_PLAIN,
+                    json.getBytes(StandardCharsets.UTF_8));
 
             response.setStatus(HttpServletResponse.SC_CREATED);
         } catch (Exception e) {
@@ -192,10 +212,12 @@ public class SkierServlet extends HttpServlet {
     }
 
     // validate the request url path according to the API spec
-    private boolean isUrlValid(String[] urlPath) {
+    private boolean isUrlValid(HttpServletRequest request, String[] urlPath) {
         // urlPath  = "/1/vertical"
         if (urlPath.length == 3) {
-            return ServerUtil.isNumeric(urlPath[1]) && urlPath[2].equals("vertical");
+            // skierID & resort are required, season is optional
+            return ServerUtil.isNumeric(urlPath[1]) && urlPath[2].equals("vertical")
+                    && request.getParameter("resort") != null;
         }
         // urlPath  = "/1/seasons/2019/day/1/skier/123"
         // urlParts = [, 1, seasons, 2019, day, 1, skier, 123]

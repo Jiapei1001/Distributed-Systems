@@ -44,7 +44,7 @@ public class SkierDao {
     }
 
     // For skier N, get the total vertical for the skier the specified resort.
-    public Map<String, Integer> getVerticalTotalsPerResort(String skierID, Integer resortID) {
+    public Map<String, Integer> getVerticalTotalsPerResort(String skierID, String resortID) {
         Map<String, Integer> res = new HashMap<>();
 
         Map<String, String> seasonVerticals;
@@ -59,6 +59,19 @@ public class SkierDao {
         }
 
         return res.isEmpty() ? null : res;
+    }
+
+    public Map<String, Integer> getVerticalTotalPerResortAndSeason(String skierID, String resortID, String seasonID) {
+        Map<String, Integer> seasonVerticals = getVerticalTotalsPerResort(skierID, resortID);
+
+        if (seasonVerticals == null || !seasonVerticals.containsKey(seasonID)) {
+            return null;
+        }
+
+        Map<String, Integer> res = new HashMap<>();
+        res.put(resortID, seasonVerticals.get(seasonID));
+
+        return res;
     }
 
     // Query #3 - For skier N, show me the lifts they rode on each ski day
