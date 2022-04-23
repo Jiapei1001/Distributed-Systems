@@ -28,6 +28,7 @@ public class ResortDao {
 
         // SET, SCARD key, Returns the set cardinality (number of elements) of the set stored at
         try (Jedis jedis = jedisPool.getResource()) {
+            // SCARD - Integer reply: the cardinality (number of elements) of the set, or 0 if key does not exist.
             res = (int) jedis.scard(Resort_Season_Day);
         }
         return res;

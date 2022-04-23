@@ -2,6 +2,7 @@ package servlet;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import dao.ResortDao;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -49,6 +50,13 @@ public class ResortServlet extends HttpServlet {
         }
 
         // valid
+        ResortDao resortDao;
+        try {
+            resortDao = new ResortDao();
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+
         // urlParts = [, 1, seasons]
         if (urlPath.length == 3) {
             // TODO: process to get the seasons by the input resortID
@@ -63,10 +71,20 @@ public class ResortServlet extends HttpServlet {
         }
         // urlParts = [, 1, seasons, 2019, day, 1, skiers]
         else if (urlPath.length == 7) {
-            // TODO: process to get the number of skiers at resort/season/day
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write(gson.toJson(new ResortSkiers("Mission Ridge", 78999),
-                    ResortSkiers.class));
+            String resortID = urlPath[1];
+            String seasonID = urlPath[3];
+            String dayID = urlPath[5];
+
+            // get number of unique skiers at resort/season/day
+            int uniqueCnt = resortDao.getUniqueSkiersPerDay(resortID, seasonID, dayID);
+
+            if (uniqueCnt == 0) {
+                response.getWriter().write(gson.toJson(new ResponseMsg("Data not found.")));
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            } else {
+                response.getWriter().write(gson.toJson(new ResortSkiers(resortID, uniqueCnt), ResortSkiers.class));
+                response.setStatus(HttpServletResponse.SC_OK);
+            }
         }
     }
 

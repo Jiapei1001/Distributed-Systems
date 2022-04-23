@@ -19,7 +19,6 @@ import model.ResponseMsg;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
-
 @WebServlet(name = "SkierServlet", value = "/SkierServlet")
 public class SkierServlet extends HttpServlet {
 
@@ -98,7 +97,8 @@ public class SkierServlet extends HttpServlet {
             String dayID = urlPath[5];
             String skierID = urlPath[7];
 
-            Integer verticalTotal = skierDao.getVerticalTotalPerDay(skierID, resortID, seasonID, dayID);
+            Integer verticalTotal = skierDao.getVerticalTotalPerDay(skierID, resortID, seasonID,
+                    dayID);
 
             if (verticalTotal == null) {
                 response.getWriter().write(gson.toJson(new ResponseMsg("Data not found.")));
@@ -138,14 +138,9 @@ public class SkierServlet extends HttpServlet {
         }.getType();
         Map<String, String> reqBody = gson.fromJson(request.getReader(), type);
 
-        LiftRide ride = new LiftRide(
-                urlPath[1],
-                urlPath[3],
-                urlPath[5],
-                Integer.parseInt(urlPath[7]),
-                Integer.parseInt(reqBody.get("time")),
-                Integer.parseInt(reqBody.get("liftID")),
-                Integer.parseInt(reqBody.get("waitTime")));
+        LiftRide ride = new LiftRide(urlPath[1], urlPath[3], urlPath[5],
+                Integer.parseInt(urlPath[7]), Integer.parseInt(reqBody.get("time")),
+                Integer.parseInt(reqBody.get("liftID")), Integer.parseInt(reqBody.get("waitTime")));
 
         // Gson loads request's payload into a separate class
         /*
@@ -233,14 +228,10 @@ public class SkierServlet extends HttpServlet {
         // urlPath  = "/1/seasons/2019/day/1/skier/123"
         // urlParts = [, 1, seasons, 2019, day, 1, skier, 123]
         if (urlPath.length == 8) {
-            return ServerUtil.isNumeric(urlPath[1])
-                    && (urlPath[2].equals("seasons"))
-                    && ServerUtil.isNumeric(urlPath[3])
-                    && (urlPath[4].equals("days"))
-                    && ServerUtil.isNumeric((urlPath[5]))
-                    && Integer.parseInt(urlPath[5]) >= 1
-                    && Integer.parseInt(urlPath[5]) <= 365
-                    && (urlPath[6].equals("skiers"))
+            return ServerUtil.isNumeric(urlPath[1]) && (urlPath[2].equals("seasons"))
+                    && ServerUtil.isNumeric(urlPath[3]) && (urlPath[4].equals("days"))
+                    && ServerUtil.isNumeric((urlPath[5])) && Integer.parseInt(urlPath[5]) >= 1
+                    && Integer.parseInt(urlPath[5]) <= 365 && (urlPath[6].equals("skiers"))
                     && ServerUtil.isNumeric(urlPath[7]);
         }
 
