@@ -6,17 +6,17 @@ import redis.clients.jedis.JedisPoolConfig;
 public class SkierJedisPool {
 
     // private static final String SKIER_REDIS_HOST = "localhost";   // "127.0.0.1"
-    private static final String SKIER_REDIS_HOST = "3.92.77.251";
+    private static final String SKIER_REDIS_HOST = "3.91.79.59";
     private static final int SKIER_REDIS_PORT = 6379;
 
-    private static JedisPoolConfig poolConfig;
-    private static JedisPool jedisPool;
+    private JedisPoolConfig poolConfig;
+    private JedisPool jedisPool;
 
     public SkierJedisPool() throws Exception {
         initialJedisPool();
     }
 
-    public static JedisPool getJedisPool() {
+    public JedisPool getJedisPool() {
         return jedisPool;
     }
 
@@ -50,7 +50,7 @@ public class SkierJedisPool {
             poolConfig.setMinIdle(64);
 
             jedisPool = new JedisPool(poolConfig, SKIER_REDIS_HOST, SKIER_REDIS_PORT, 10 * 1000,
-                    "default", "admin123456");
+                    "default", "admin123456!!");
             // jedisPool = new JedisPool(REDIS_HOST, REDIS_PORT);
         } catch (Exception e) {
             throw new Exception("First create JedisPool error : " + e);

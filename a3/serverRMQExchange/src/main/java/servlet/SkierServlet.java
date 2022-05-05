@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
 import dao.SkierDao;
+import dao.SkierJedisPool;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -28,9 +29,15 @@ public class SkierServlet extends HttpServlet {
     private static final String EXCHANGE_NAME = "lift_ride";
 
     private ObjectPool<Channel> channelPool;
+    private SkierJedisPool skierJedisPool;
 
     public void init() throws ServletException {
         this.channelPool = new GenericObjectPool<>(new ChannelPool());
+        try {
+            this.skierJedisPool = new SkierJedisPool();
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
     }
 
     @Override
@@ -57,7 +64,7 @@ public class SkierServlet extends HttpServlet {
         // valid
         SkierDao skierDao;
         try {
-            skierDao = new SkierDao();
+            skierDao = new SkierDao(this.skierJedisPool.getJedisPool());
         } catch (Exception e) {
             throw new ServletException(e);
         }

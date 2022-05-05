@@ -3,6 +3,7 @@ package servlet;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import dao.ResortDao;
+import dao.ResortJedisPool;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -21,6 +22,16 @@ import model.SeasonsList;
 
 @WebServlet(name = "ResortServlet", value = "/ResortServlet")
 public class ResortServlet extends HttpServlet {
+
+    private ResortJedisPool resortJedisPool;
+
+    public void init() throws ServletException {
+        try {
+            this.resortJedisPool = new ResortJedisPool();
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -52,7 +63,7 @@ public class ResortServlet extends HttpServlet {
         // valid
         ResortDao resortDao;
         try {
-            resortDao = new ResortDao();
+            resortDao = new ResortDao(this.resortJedisPool.getJedisPool());
         } catch (Exception e) {
             throw new ServletException(e);
         }

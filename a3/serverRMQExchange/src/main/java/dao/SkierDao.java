@@ -9,10 +9,10 @@ import redis.clients.jedis.JedisPool;
 
 public class SkierDao {
 
-    public static JedisPool jedisPool;
+    private JedisPool jedisPool;
 
-    public SkierDao() throws Exception {
-        jedisPool = SkierJedisPool.getJedisPool();
+    public SkierDao(JedisPool jedisPool) throws Exception {
+        this.jedisPool = jedisPool;
     }
 
     // Query #1 - For skier N, how many days have they skied this season?
@@ -31,16 +31,16 @@ public class SkierDao {
     // Query #2 - For skier N, what are the vertical totals for each ski day? (calculate vertical as liftID*10)
     public Integer getVerticalTotalPerDay(String skierID, String resortID, String seasonID,
             String dayID) {
-        Integer res = null;
+        String res;
 
         String Skier_Resort = "Skier_" + skierID + "_Resort_" + resortID;
         String Season_Day = seasonID + "_" + dayID;
         try (Jedis jedis = jedisPool.getResource()) {
             // hash, key, field
-            res = Integer.parseInt(jedis.hget(Skier_Resort, Season_Day));
+            res = jedis.hget(Skier_Resort, Season_Day);
         }
 
-        return res;
+        return res == null ? null : Integer.parseInt(res);
     }
 
     // For skier N, get the total vertical for the skier the specified resort.
