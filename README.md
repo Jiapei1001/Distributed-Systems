@@ -5,16 +5,30 @@ This project is intended for building a scalable distributed cloud-based system 
 ![profile_edit](https://user-images.githubusercontent.com/20607583/154911354-053248ef-2142-466d-a763-d7c2d61fabd4.jpeg)
 
 
-## Restful API
+## System
+![diagram_1_1](https://user-images.githubusercontent.com/20607583/167020414-f2e29922-5b42-476a-82c6-e7a39c4788b7.png)
+
+![diagram_2](https://user-images.githubusercontent.com/20607583/167019012-536cec3d-72af-408d-b342-87b07c2bf600.png)
+
+#### JMeter
+![aggregate_seed_v8](https://user-images.githubusercontent.com/20607583/167019124-ef479c8f-5f00-49d9-9686-d57e8cc3ba47.jpeg)
+
+<br></br>
+ 
+#### Extension
+<p align="center">
+  <img alt="Light" src="https://user-images.githubusercontent.com/20607583/167019957-e8688cce-790b-4df5-8243-2ce38c61d4ae.jpeg" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="https://user-images.githubusercontent.com/20607583/167019971-f5e51524-3bf4-4a43-9921-da57697f3472.jpeg" width="45%">
+</p>
+
+
+## API
 The API endpoints and model schemas are implemented by client's specifications . [](https://app.swaggerhub.com/apis/cloud-perf/SkiDataAPI/1.16)
 <p align="center">
 <img width="600" alt="Swagger APIs" src="https://user-images.githubusercontent.com/20607583/154888454-ae0dc003-602d-4e20-b6b0-80c48ce2a888.png">
 </p>
 
-
-## Message Processing
-
-![A2_server_diagram](https://user-images.githubusercontent.com/20607583/158247392-8271d8b2-d236-4a67-b65e-243c13d10904.png)
 
 
 ## Server
